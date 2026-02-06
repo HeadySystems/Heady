@@ -63,6 +63,12 @@ verifiedResources:
     - name: story-driver.yaml
       status: verified
       description: Story Driver — narrative intelligence, event-to-story mapping, timeline generation, integration hooks
+    - name: arena-mode.yaml
+      status: verified
+      description: Heady Arena Mode — multi-candidate evaluation, multi-metric scoring, intelligent squash-merge protocol
+    - name: build-any-app.yaml
+      status: verified
+      description: Build Any App — universal agent-driven pattern for building any app with the Heady system
 
   coreEngines:
     - name: hc_pipeline.js
@@ -177,6 +183,35 @@ operatingDirectives:
       Use spec-driven and contract-driven design. Make tests, error
       handling, security, and observability first-class from the start.
       Employ Socratic and evaluator agents for high-risk areas.
+
+  - id: always-arena
+    directive: >
+      Use Heady Arena Mode as the standard evaluation path for all
+      non-trivial changes. Generate multiple candidates, score them
+      across correctness, performance, resource efficiency, maintainability,
+      stability, and historical reliability. Base Arena decisions on all
+      available Heady intelligence: registry patterns, resource signals,
+      story history, and user preferences. When a candidate wins, perform
+      an intelligent squash-merge into the target branch: one clean commit
+      with full context, followed by final verification.
+
+  - id: always-build-any-app
+    directive: >
+      For all Heady projects and services, run HCFullPipeline continuously
+      as the primary way to plan, execute, and track work. Use agents mapped
+      to each SDLC phase (planning, design, coding, quality, security,
+      evaluation, ops). Always pick from the standardized pattern catalog.
+      Make CI/CD agentic and repeatable. Use Arena Mode for every decision
+      with multiple viable approaches. Treat observability as mandatory.
+      Feed continuous learning back into patterns, prompts, and policies.
+
+  - id: always-continuous
+    directive: >
+      Keep HCFullPipeline running as the default engine for everything.
+      For every change, create or attach to an HCFullPipeline run. Idle
+      periods run optimization and learning pipelines. Make Arena Mode
+      the default review path. Code, patterns, prompts, and policies all
+      evolve through HCFullPipeline + Arena, not ad-hoc changes.
 
 # ─── PIPELINE INITIALIZATION TEMPLATE ─────────────────────────────────────
 pipelineInitTemplate:

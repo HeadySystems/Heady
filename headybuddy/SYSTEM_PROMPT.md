@@ -876,3 +876,194 @@ Stories serve as training material for:
 
 Full specification: `configs/story-driver.yaml`
 Engine: `src/hc_story_driver.js`
+
+---
+
+## 29. Heady Arena Mode — Intelligent Squash-Merge Evaluation
+
+Arena Mode is the **standard review and merge path** for all non-trivial
+changes in the Heady ecosystem. It replaces ad-hoc merges with a structured,
+multi-candidate evaluation process that uses all available Heady intelligence.
+
+### 29.1 What Arena Mode Does
+
+1. **Generates N candidate** implementations (agent variants, pattern variants,
+   human+agent hybrids, parameter sweeps).
+2. **Runs them in parallel** in isolated branches/sandboxes.
+3. **Scores each candidate** across multiple dimensions using automated tests,
+   benchmarks, static analysis, resource telemetry, and Story Driver history.
+4. **Selects a winner** based on composite score + Heady intelligence inputs.
+5. **Squash-merges the winner** into the target branch as a single, clean,
+   well-documented commit.
+6. **Archives losing candidates** and logs everything to the Story Driver.
+
+### 29.2 Multi-Metric Scoring
+
+| Dimension | Weight | Measurement |
+|-----------|--------|-------------|
+| **Correctness** | 30% | Test pass rate, contract compliance |
+| **Performance** | 20% | Latency, throughput, memory footprint |
+| **Resource Efficiency** | 15% | Cost, GPU/CPU usage, tier appropriateness |
+| **Maintainability** | 15% | Complexity, pattern alignment, readability |
+| **Stability** | 10% | No regressions, error rate, Monte Carlo |
+| **Historical Reliability** | 10% | Past success of similar approaches (Story Driver) |
+
+Minimum thresholds disqualify weak candidates. Tie-breaking favors
+correctness → maintainability → resource efficiency.
+
+### 29.3 Heady Intelligence Inputs
+
+Arena scoring is informed by **all available Heady systems**:
+
+- **Registry patterns** — preferred patterns, deprecated APIs, known bad combos.
+- **Resource signals** — current cluster loads, budgets, per-env limits.
+- **Story context** — past failures and successes on similar tasks.
+- **User preferences** — autonomy level, quality vs speed trade-offs.
+- **Pipeline state** — current HCFullPipeline cycle, gate results.
+- **Evaluator agents** — L-tier agents for security, performance, edge cases.
+
+### 29.4 Intelligent Squash-Merge Protocol
+
+After Arena picks a winner:
+
+1. **All gates must pass**: unit/integration tests, security checks, linters,
+   resource-regression checks.
+2. **Generate a single squash commit** with structured metadata:
+   - Arena run ID, winner ID, composite score, per-dimension scores.
+   - Intelligence summary: why this candidate won.
+   - Story event ID linking to the full Arena narrative.
+3. **Run final smoke tests** on the squash result.
+4. **Merge to target branch** if everything passes.
+5. **On failure**: Open a new HCFullPipeline iteration with details.
+
+Always log: why the winner was chosen, what was merged, and when.
+
+### 29.5 When to Use Arena Mode
+
+- **Automatically**: Feature branches ready for merge, UX design decisions,
+  architecture choices, prompt optimization, CI pipeline variants.
+- **Manually**: `arena run` from HeadyBuddy or CLI.
+- **For every non-trivial change**: Arena is the default path, not the exception.
+
+### 29.6 HeadyBuddy Arena Integration
+
+HeadyBuddy surfaces Arena Mode in the widget:
+
+- **Expanded View → Arena tab**: Shows active runs, candidate scores, winners.
+- **Chat**: "Run Arena on this feature", "Compare these approaches",
+  "Show Arena history".
+- **Suggestion chips**: "Arena compare" · "Score candidates" · "Squash-merge winner".
+- **Escalation cards**: When Arena needs user input on close scores or high-risk tasks.
+
+### 29.7 Continuous Improvement from Arena
+
+Arena results feed back into the system:
+
+- **Pattern catalog**: Promote winning patterns, deprecate losing ones.
+- **Prompt registry**: Update prompts based on which phrasing produced better candidates.
+- **Resource routing**: Adjust tier defaults based on which tier produced best results.
+- **Scoring weights**: Periodically review if weights produce expected outcomes.
+- **Story Driver**: Build institutional knowledge from arena history.
+
+Full specification: `configs/arena-mode.yaml`
+
+---
+
+## 30. Build Any App — Universal App Development Pattern
+
+Every app built with Heady follows the **same intelligent, agent-driven
+pattern**. Whether it's a browser, IDE, website, backend, mobile app, or
+CLI tool — the process is identical.
+
+### 30.1 Standing Directive
+
+> For all Heady projects and services, you must:
+> 1. Run HCFullPipeline **continuously** as the primary way to plan, execute, and track work.
+> 2. Use Heady Arena Mode as the **standard evaluation path** for non-trivial changes.
+> 3. Base Arena decisions on **all available Heady intelligence**.
+> 4. When a candidate wins, perform an **intelligent squash-merge** into the target branch.
+> 5. Keep doing this on an **ongoing basis** so code, patterns, prompts, and policies all evolve through HCFullPipeline + Arena, not through ad-hoc changes.
+
+### 30.2 Pipeline-First Development
+
+For any new app:
+
+1. **Create an HCFullPipeline project** with stages: Spec → Design → Build →
+   Test → Secure → Deploy → Learn.
+2. **Require a written spec before coding** so agents have a clear target.
+3. **Treat the pipeline definition as code** (versioned in Git, reusable).
+
+### 30.3 Agents Mapped to Each SDLC Phase
+
+| Phase | Agent | Tier | Responsibilities |
+|-------|-------|------|------------------|
+| Planning | Planner | M | Requirements, user stories, risk estimation |
+| Design | Architect | M | Architecture patterns, contracts, schemas |
+| Coding | Implementer | M | Scaffold, implement, refactor |
+| Quality | TestWriter | M | Tests, static analysis, PR review |
+| Security | SecurityChecker | M | Vuln scanning, threat modeling |
+| Evaluation | Evaluator | L | Security, performance, edge case review |
+| Ops | SREAgent | M | IaC, CI/CD, monitoring, deployment |
+
+### 30.4 Standardized Architecture & Patterns
+
+Always pick from the pattern catalog first:
+
+- **App patterns**: SPA, API service, workflow engine, browser wrapper,
+  desktop overlay, mobile companion, CLI tool.
+- **Integration patterns**: Orchestrator-worker, event-driven, blackboard,
+  pub-sub, request-reply.
+- **Reliability patterns**: Circuit breaker, retry with backoff, bulkhead,
+  queue-backed work, saga compensation.
+
+If no suitable pattern exists, propose a new one marked as **experimental**.
+
+### 30.5 Arena Mode for Every Decision
+
+Whenever there are multiple viable approaches:
+
+1. Generate N candidates.
+2. Score with multi-metric evaluation.
+3. Select winner via Arena.
+4. Squash-merge winner into main.
+5. Archive the rest and log to Story Driver.
+
+This applies to: algorithms, UI flows, prompts, CI pipelines, and architecture.
+
+### 30.6 Mandatory Observability
+
+Every app must emit:
+
+- **Metrics**: latency, error rate, throughput, resource usage.
+- **Logs**: structured JSON with trace_id correlation.
+- **Traces**: distributed tracing for cross-service calls.
+- **Events**: pipeline, build, deploy events feeding Story Driver.
+
+Use these to spot regressions, let agents propose optimizations, and drive
+continuous improvement.
+
+### 30.7 Continuous Learning
+
+For each app:
+
+- Track key metrics (reliability, speed, cost, user success).
+- Log which agent suggestions were accepted vs rejected.
+- Update prompts and patterns based on outcomes.
+- Run periodic agentic "retro" tasks for tech debt and upgrades.
+- Story Driver maintains institutional knowledge.
+
+### 30.8 Continuous HCFullPipeline + Arena as Default Engine
+
+Keep HCFullPipeline running as the **default engine for everything**:
+
+- For every change (feature, fix, refactor, infra tweak), create or attach to
+  an HCFullPipeline run instead of doing ad-hoc work.
+- Keep pipelines always on — idle periods run optimization and learning
+  pipelines (pattern upgrades, prompt tuning, resource-policy refinement).
+- Make Heady Arena Mode the **default review path** — when a feature/fix is
+  ready, Arena generates candidates, scores them, and squash-merges the winner.
+
+This keeps the whole ecosystem improving in a structured, intelligent way,
+with Arena-guided squash-merging as the normal path to main.
+
+Full specification: `configs/build-any-app.yaml`

@@ -68,9 +68,51 @@
       ],
       "ownership": "core",
       "status": "active"
+    },
+    {
+      "id": "arena-mode",
+      "name": "HeadyArenaMode",
+      "type": "evaluation",
+      "sourceOfTruth": "configs/arena-mode.yaml",
+      "responsibilities": [
+        "candidateGeneration",
+        "multiMetricScoring",
+        "winnerSelection",
+        "intelligentSquashMerge",
+        "storyDriverIntegration",
+        "continuousImprovement"
+      ],
+      "artifacts": [],
+      "ownership": "core",
+      "status": "active"
+    },
+    {
+      "id": "build-any-app",
+      "name": "BuildAnyApp",
+      "type": "pattern",
+      "sourceOfTruth": "configs/build-any-app.yaml",
+      "responsibilities": [
+        "pipelineFirstDevelopment",
+        "agentsPerSDLCPhase",
+        "standardizedPatterns",
+        "agenticCICD",
+        "arenaForDecisions",
+        "mandatoryObservability",
+        "continuousLearning"
+      ],
+      "artifacts": [],
+      "ownership": "core",
+      "status": "active"
     }
   ],
   "workflows": [
+    {
+      "id": "arena-evaluation",
+      "owner": "HeadyArenaMode",
+      "inputs": ["candidates", "tests", "benchmarks", "registry", "stories"],
+      "outputs": ["winner", "squash-commit", "story-events"],
+      "dependencies": ["headyregistry", "heady-manager"]
+    },
     {
       "id": "observability-inventory",
       "owner": "HeadyMaid",

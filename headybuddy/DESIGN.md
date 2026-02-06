@@ -308,6 +308,7 @@ The Expanded View now supports four tabs:
 | **Overview** | `LayoutDashboard` | Pipeline status, resource summary, activation state |
 | **Steps** | `ListChecks` | HCFullPipeline stage progress (7 stages) |
 | **Resources** | `Activity` | Full resource health panel + quick actions |
+| **Arena** | `Swords` | Arena Mode runs, candidate scores, squash-merge status |
 | **Story** | `BookOpen` | Narrative timeline, project/feature/incident stories |
 | **History** | `MessageSquare` | Scrollable conversation history |
 
@@ -362,6 +363,62 @@ that turns system events into coherent timelines.
 | **feature** | `heady-emerald/20` bg, `heady-emerald` text | "Feature: Landing Page" |
 | **incident** | `heady-amber/20` bg, `heady-amber` text | "Incident: OOM Event" |
 | **experiment** | `heady-magenta/20` bg, `heady-magenta` text | "Experiment: Arena Run #3" |
+
+---
+
+## 12.2 Arena Mode Panel (Expanded View → Arena Tab)
+
+The Arena tab surfaces **Heady Arena Mode** — the intelligent multi-candidate
+evaluation and squash-merge system.
+
+```
+┌─────────────────────────────────────┐
+│  Arena Mode                         │
+├─────────────────────────────────────┤
+│  Active Run: #42 — "Landing Page"  │
+│  Status: scoring (3 candidates)     │
+│                                     │
+│  ── Candidates ────────────────── │
+│  ◆ A  Score: 92%  ████████████░░  │
+│    Correctness: 95% Perf: 88%     │
+│  ○ B  Score: 85%  █████████░░░░░  │
+│    Correctness: 90% Perf: 82%     │
+│  ○ C  Score: 78%  ████████░░░░░░  │
+│    Correctness: 82% Perf: 75%     │
+│                                     │
+│  Winner: Candidate A (recommended) │
+│                                     │
+├─────────────────────────────────────┤
+│ [Squash-merge A] [Compare detail]  │
+│ [Re-run Arena] [View history]      │
+└─────────────────────────────────────┘
+```
+
+### Arena Candidate Visual Indicators
+
+| Status | Icon | Color |
+|--------|------|-------|
+| **winner** | `◆` (diamond, filled) | `heady-emerald` |
+| **runner-up** | `○` (circle) | `heady-cyan` |
+| **disqualified** | `✕` (cross) | `heady-amber` |
+| **running** | `●` (dot, pulsing) | `heady-magenta` |
+
+### Arena Score Bars
+
+- **Shape**: Rounded bar (`border-radius: 4px`)
+- **Background**: `heady-border/30`
+- **Fill colors**: Match severity thresholds (emerald >85%, cyan 70-85%, amber <70%)
+- **Height**: 6 px
+- **Labels**: Score percentage right-aligned in `heady-muted`
+
+### Arena Run Status Badge (Main Widget Header)
+
+When an Arena run is active, a small badge appears in the header:
+- **Shape**: Pill (`border-radius: 9999px`)
+- **Background**: `heady-magenta/20`
+- **Text**: `heady-magenta`, 9 px, e.g. "Arena #42"
+- **Animation**: Subtle pulse when scoring
+- **Click**: Navigates to Expanded View → Arena tab
 
 ---
 

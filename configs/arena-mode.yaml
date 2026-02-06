@@ -1,0 +1,279 @@
+# HEADY_BRAND:BEGIN
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  █╗  █╗███████╗ █████╗ ██████╗ █╗   █╗                     ║
+# ║  █║  █║█╔════╝█╔══█╗█╔══█╗╚█╗ █╔╝                     ║
+# ║  ███████║█████╗  ███████║█║  █║ ╚████╔╝                      ║
+# ║  █╔══█║█╔══╝  █╔══█║█║  █║  ╚█╔╝                       ║
+# ║  █║  █║███████╗█║  █║██████╔╝   █║                        ║
+# ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                        ║
+# ║                                                                  ║
+# ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
+# ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║  FILE: configs/arena-mode.yaml                                    ║
+# ║  LAYER: root                                                      ║
+# ╚══════════════════════════════════════════════════════════════════╝
+# HEADY_BRAND:END
+
+#
+# Heady Arena Mode — Intelligent Multi-Candidate Evaluation & Squash-Merge
+#
+# Arena Mode is the standard review and merge path for all non-trivial changes.
+# It generates N candidate implementations, scores them against multi-dimensional
+# metrics using all available Heady intelligence, and squash-merges the winner
+# into the target branch as a single clean commit.
+
+version: "1.0.0"
+
+arenaMode:
+  name: Heady Arena Mode
+  description: >
+    Customized evaluation framework that generates multiple candidate
+    implementations, tests and scores them against multi-dimensional metrics,
+    and intelligently squash-merges the winning candidate into the target branch.
+    Arena Mode leverages all Heady intelligence: registry patterns, resource
+    signals, story history, and user preferences.
+
+  # ─── WHEN TO INVOKE ──────────────────────────────────────────────────────
+  triggers:
+    automatic:
+      - condition: feature_branch_ready
+        description: When a feature or fix branch passes initial tests
+      - condition: ux_design_decision
+        description: When multiple UI/UX approaches are viable
+      - condition: architecture_choice
+        description: When multiple architectural patterns could apply
+      - condition: prompt_optimization
+        description: When tuning agent prompts or routing rules
+      - condition: ci_pipeline_variant
+        description: When comparing CI/CD pipeline configurations
+    manual:
+      - command: "arena run"
+        description: Explicitly invoke Arena Mode from HeadyBuddy or CLI
+
+  # ─── CANDIDATE GENERATION ───────────────────────────────────────────────
+  candidateGeneration:
+    description: >
+      Generate N candidate branches/patches using different approaches.
+      Candidates may come from agent variants, human+agent hybrids,
+      different patterns, or different resource tier allocations.
+    defaults:
+      minCandidates: 2
+      maxCandidates: 5
+      defaultCandidates: 3
+    sources:
+      - type: agent_variant
+        description: Same task routed to different agent configurations or tiers
+      - type: pattern_variant
+        description: Same task solved with different architectural patterns
+      - type: hybrid
+        description: Human-authored code + agent refinements
+      - type: parameter_sweep
+        description: Same approach with different parameters (prompts, temps, configs)
+    isolation:
+      description: Each candidate runs in an isolated branch or sandbox
+      branchNaming: "arena/{arenaId}/candidate-{n}"
+      cleanupPolicy: archive_losers_after_merge
+
+  # ─── MULTI-METRIC SCORING ──────────────────────────────────────────────
+  scoring:
+    description: >
+      Each candidate is scored across multiple dimensions. Weights can be
+      adjusted per task type. Arena computes a composite score and recommends
+      a winner. All scoring data is logged and fed into the Story Driver.
+    dimensions:
+      - id: correctness
+        weight: 0.30
+        description: Test pass rate, property checks, contract compliance
+        measurement: automated_tests
+      - id: performance
+        weight: 0.20
+        description: Latency, throughput, memory footprint
+        measurement: benchmark_suite
+      - id: resource_efficiency
+        weight: 0.15
+        description: Cost, GPU/CPU usage, model tier appropriateness
+        measurement: resource_telemetry
+      - id: maintainability
+        weight: 0.15
+        description: Code complexity, pattern alignment, readability score
+        measurement: static_analysis
+      - id: stability
+        weight: 0.10
+        description: No regressions, error rate, flakiness
+        measurement: regression_tests_and_monte_carlo
+      - id: historical_reliability
+        weight: 0.10
+        description: Past success rate of similar approaches (from Story Driver)
+        measurement: story_driver_query
+
+    # Minimum thresholds — a candidate is disqualified if below these
+    minimumThresholds:
+      correctness: 0.80
+      stability: 0.70
+      performance: 0.50
+
+    # Tie-breaking priority (when composite scores are within 2%)
+    tieBreaker:
+      - correctness
+      - maintainability
+      - resource_efficiency
+
+  # ─── HEADY INTELLIGENCE INPUTS ─────────────────────────────────────────
+  intelligenceInputs:
+    description: >
+      Arena Mode decisions are informed by all available Heady intelligence.
+      These inputs feed into scoring, disqualification, and recommendation.
+    sources:
+      - id: registry_patterns
+        description: Preferred patterns, deprecated APIs, known bad combinations
+        endpoint: /api/registry
+      - id: resource_signals
+        description: Current cluster loads, budgets, per-env limits
+        endpoint: /api/resources/health
+      - id: story_context
+        description: Past failures and successes on similar tasks
+        endpoint: /api/stories/search
+      - id: user_preferences
+        description: Autonomy level, quality-vs-speed trade-offs
+        source: user_config
+      - id: pipeline_state
+        description: Current HCFullPipeline cycle, gate results, active constraints
+        endpoint: /api/pipeline/state
+      - id: evaluator_agents
+        description: L-tier evaluator agents for security, performance, edge cases
+        tier: L
+
+  # ─── EXECUTION PROTOCOL ────────────────────────────────────────────────
+  execution:
+    steps:
+      - id: prepare
+        description: Create arena run, generate candidate branches, set up isolation
+      - id: execute_candidates
+        description: Run all candidates in parallel (subject to resource limits)
+        parallel: true
+        maxConcurrency: 3
+      - id: test_candidates
+        description: Execute test suites, benchmarks, and property checks per candidate
+        parallel: true
+      - id: score_candidates
+        description: Compute multi-metric scores, apply intelligence inputs
+      - id: evaluate
+        description: Run evaluator agents on top candidates (if high-risk task)
+        conditional: task.riskLevel >= "medium"
+      - id: select_winner
+        description: Recommend winner based on composite score and intelligence
+      - id: user_approval
+        description: Present results to user for approval (if not fully autonomous)
+        conditional: not task.fullyAutonomous
+      - id: squash_merge
+        description: Intelligent squash-merge of winner into target branch
+      - id: verify
+        description: Final smoke tests on squash result
+      - id: cleanup
+        description: Archive losing candidates, log everything to Story Driver
+
+  # ─── INTELLIGENT SQUASH-MERGE ──────────────────────────────────────────
+  squashMerge:
+    description: >
+      After Arena picks a winner, produce a single clean commit on the target
+      branch. The commit consolidates all changes, includes structured metadata,
+      and passes final verification before completing.
+    protocol:
+      preConditions:
+        - allGatesPass: true
+          gates:
+            - unit_integration_tests
+            - security_checks
+            - linter_clean
+            - resource_regression_check
+        - evaluatorApproval: true
+          conditional: task.riskLevel >= "high"
+
+      commitFormat:
+        type: squash
+        messageTemplate: |
+          [Arena #{arenaId}] {title}
+
+          Winner: Candidate {winnerId} (score: {compositeScore})
+          Arena Run: {arenaId} | Candidates: {candidateCount}
+
+          Scoring:
+            Correctness:   {scores.correctness}
+            Performance:   {scores.performance}
+            Resources:     {scores.resource_efficiency}
+            Maintain:      {scores.maintainability}
+            Stability:     {scores.stability}
+            Historical:    {scores.historical_reliability}
+
+          Intelligence: {intelligenceSummary}
+          Story: {storyEventId}
+
+      postConditions:
+        - smokeTestsPass: true
+        - storyEventLogged: true
+          eventType: ARENA_SQUASH_MERGE
+        - losingCandidatesArchived: true
+
+      onFailure:
+        action: open_new_pipeline_iteration
+        includeDetails: true
+        description: >
+          If the squash result fails final verification, open a new
+          HCFullPipeline iteration with details on why the candidate failed.
+
+    logging:
+      always:
+        - whyWinnerChosen: true
+          description: Metrics, trade-offs, intelligence factors
+        - whatWasSquashMerged: true
+          description: Files changed, tests passed, resource usage
+        - when: true
+          description: Timestamp and pipeline cycle context
+
+  # ─── MONTE CARLO SUPPORT ───────────────────────────────────────────────
+  monteCarlo:
+    description: >
+      For stochastic workloads or non-deterministic tests, run Monte Carlo
+      simulations to get statistically meaningful results.
+    enabled: true
+    defaultRuns: 10
+    maxRuns: 100
+    confidenceLevel: 0.95
+    engine: src/hc_monte_carlo.js
+
+  # ─── STORY DRIVER INTEGRATION ──────────────────────────────────────────
+  storyIntegration:
+    description: >
+      Arena Mode is a first-class event source for the Story Driver.
+      Every arena run generates a coherent narrative of what was tried,
+      how candidates performed, and why the winner was chosen.
+    events:
+      - ARENA_RUN_STARTED
+      - ARENA_CANDIDATE_CREATED
+      - ARENA_CANDIDATE_SCORED
+      - ARENA_WINNER_SELECTED
+      - ARENA_SQUASH_MERGE
+      - ARENA_VERIFICATION_PASSED
+      - ARENA_VERIFICATION_FAILED
+      - ARENA_CANDIDATES_ARCHIVED
+    narrativeTemplate: >
+      Arena Run #{arenaId}: Generated {candidateCount} candidates for "{title}".
+      Winner: Candidate {winnerId} (score {compositeScore}).
+      Reason: {winnerReason}.
+      Squash-merged into {targetBranch}. Losing candidates archived.
+
+  # ─── CONTINUOUS IMPROVEMENT ────────────────────────────────────────────
+  continuousImprovement:
+    description: >
+      Arena results feed back into the system to improve future decisions.
+    feedbackLoops:
+      - target: pattern_catalog
+        action: Promote winning patterns, deprecate losing ones
+      - target: prompt_registry
+        action: Update prompts based on which phrasing led to better candidates
+      - target: resource_routing
+        action: Adjust tier defaults based on which tier produced best results
+      - target: scoring_weights
+        action: Periodically review if scoring weights produce expected outcomes
+      - target: story_driver
+        action: Build institutional knowledge from arena history

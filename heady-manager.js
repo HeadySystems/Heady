@@ -72,6 +72,7 @@ app.get("/api/pulse", (req, res) => {
       "/api/playbook", "/api/agentic", "/api/activation", "/api/public-domain",
       "/api/resources/health", "/api/resources/snapshot", "/api/resources/events",
       "/api/stories", "/api/stories/recent", "/api/stories/summary",
+      "/api/arena/*", "/api/build-any-app",
     ],
   });
 });
@@ -433,6 +434,15 @@ app.post("/api/buddy/chat", (req, res) => {
     } else {
       reply = `Resource overview: ${activeNodes}/${nodeCount} nodes active. Memory: ${Math.round(process.memoryUsage().heapUsed / 1048576)}MB heap. Check the Orchestrator tab for detailed tier usage.`;
     }
+  } else if (lowerMsg.includes("arena") || lowerMsg.includes("squash") || lowerMsg.includes("candidate")) {
+    const activeRun = arenaState.activeRun;
+    if (activeRun) {
+      const scored = activeRun.candidates.filter(c => c.status === "scored");
+      const winnerInfo = activeRun.winner ? `Winner: Candidate ${activeRun.winner}.` : `${scored.length}/${activeRun.candidateCount} candidates scored.`;
+      reply = `Arena Run #${activeRun.id} "${activeRun.title}" — Status: ${activeRun.status}. ${winnerInfo} ${activeRun.status === "winner_selected" ? "Ready to squash-merge. Say 'squash-merge' to proceed." : "Check the Arena tab in Expanded View for details."}`;
+    } else {
+      reply = `No active Arena run. ${arenaState.runs.length} total runs completed. Say "start arena" with a title to begin a new evaluation, or check history in the Arena tab.`;
+    }
   } else if (lowerMsg.includes("story") || lowerMsg.includes("what changed") || lowerMsg.includes("narrative")) {
     if (storyDriver) {
       const sysSummary = storyDriver.getSystemSummary();
@@ -482,6 +492,11 @@ app.get("/api/buddy/suggestions", (req, res) => {
   chips.push({ label: "Summarize this", icon: "file-text", prompt: "Summarize the content I'm looking at." });
   chips.push({ label: continuousPipeline.running ? "Pipeline status" : "Run pipeline", icon: "play", prompt: continuousPipeline.running ? "Show pipeline status." : "Start HCFullPipeline." });
   if (activeNodes > 0) chips.push({ label: "Check resources", icon: "activity", prompt: "Show resource usage and node health." });
+  if (arenaState.activeRun) {
+    chips.push({ label: `Arena #${arenaState.activeRun.id}`, icon: "swords", prompt: `Show Arena run #${arenaState.activeRun.id} status.` });
+  } else {
+    chips.push({ label: "Start Arena", icon: "swords", prompt: "Start a new Arena evaluation run." });
+  }
   chips.push({ label: "Surprise me", icon: "sparkles", prompt: "Suggest something useful right now." });
 
   res.json({ suggestions: chips.slice(0, 5), ts: new Date().toISOString() });
@@ -599,6 +614,196 @@ app.post("/api/buddy/pipeline/continuous", (req, res) => {
     cycleCount: continuousPipeline.cycleCount, gates: continuousPipeline.gateResults,
     ts: new Date().toISOString(),
   });
+});
+
+// ─── Arena Mode ─────────────────────────────────────────────────────
+let arenaState = {
+  runs: [],
+  activeRun: null,
+  nextRunId: 1,
+};
+
+function createArenaRun(title, candidateCount = 3) {
+  const run = {
+    id: arenaState.nextRunId++,
+    title,
+    status: "created",
+    candidateCount,
+    candidates: [],
+    winner: null,
+    scores: {},
+    createdAt: new Date().toISOString(),
+    completedAt: null,
+    storyEventId: null,
+  };
+  for (let i = 0; i < candidateCount; i++) {
+    run.candidates.push({
+      id: String.fromCharCode(65 + i),
+      status: "pending",
+      scores: {
+        correctness: 0,
+        performance: 0,
+        resource_efficiency: 0,
+        maintainability: 0,
+        stability: 0,
+        historical_reliability: 0,
+      },
+      compositeScore: 0,
+    });
+  }
+  arenaState.runs.push(run);
+  arenaState.activeRun = run;
+
+  if (storyDriver) {
+    storyDriver.ingestSystemEvent({
+      type: "ARENA_RUN_STARTED",
+      refs: { arenaId: run.id, title, candidateCount },
+      source: "arena_mode",
+    });
+  }
+
+  return run;
+}
+
+function scoreArenaCandidate(run, candidateId, scores) {
+  const candidate = run.candidates.find(c => c.id === candidateId);
+  if (!candidate) return null;
+  candidate.scores = { ...candidate.scores, ...scores };
+
+  const weights = { correctness: 0.30, performance: 0.20, resource_efficiency: 0.15, maintainability: 0.15, stability: 0.10, historical_reliability: 0.10 };
+  candidate.compositeScore = Object.entries(weights).reduce((sum, [k, w]) => sum + (candidate.scores[k] || 0) * w, 0);
+  candidate.compositeScore = Math.round(candidate.compositeScore * 100) / 100;
+  candidate.status = "scored";
+
+  if (storyDriver) {
+    storyDriver.ingestSystemEvent({
+      type: "ARENA_CANDIDATE_SCORED",
+      refs: { arenaId: run.id, candidateId, compositeScore: candidate.compositeScore },
+      source: "arena_mode",
+    });
+  }
+
+  return candidate;
+}
+
+function selectArenaWinner(run) {
+  const scored = run.candidates.filter(c => c.status === "scored");
+  if (scored.length === 0) return null;
+
+  const thresholds = { correctness: 0.80, stability: 0.70 };
+  const qualified = scored.filter(c =>
+    c.scores.correctness >= thresholds.correctness &&
+    c.scores.stability >= thresholds.stability
+  );
+
+  const pool = qualified.length > 0 ? qualified : scored;
+  pool.sort((a, b) => b.compositeScore - a.compositeScore);
+
+  const winner = pool[0];
+  winner.status = "winner";
+  run.winner = winner.id;
+  run.status = "winner_selected";
+  run.completedAt = new Date().toISOString();
+
+  if (storyDriver) {
+    storyDriver.ingestSystemEvent({
+      type: "ARENA_WINNER_SELECTED",
+      refs: {
+        arenaId: run.id,
+        winnerId: winner.id,
+        compositeScore: winner.compositeScore,
+        title: run.title,
+      },
+      source: "arena_mode",
+    });
+  }
+
+  return winner;
+}
+
+app.get("/api/arena/runs", (req, res) => {
+  res.json({
+    ok: true,
+    total: arenaState.runs.length,
+    activeRun: arenaState.activeRun ? arenaState.activeRun.id : null,
+    runs: arenaState.runs.slice(-20),
+    ts: new Date().toISOString(),
+  });
+});
+
+app.get("/api/arena/active", (req, res) => {
+  if (!arenaState.activeRun) return res.json({ ok: true, activeRun: null, ts: new Date().toISOString() });
+  res.json({ ok: true, activeRun: arenaState.activeRun, ts: new Date().toISOString() });
+});
+
+app.post("/api/arena/create", (req, res) => {
+  const { title = "Arena Run", candidates = 3 } = req.body;
+  const run = createArenaRun(title, Math.min(Math.max(candidates, 2), 5));
+  res.json({ ok: true, run, ts: new Date().toISOString() });
+});
+
+app.post("/api/arena/score", (req, res) => {
+  const { runId, candidateId, scores } = req.body;
+  const run = arenaState.runs.find(r => r.id === runId);
+  if (!run) return res.status(404).json({ error: `Arena run ${runId} not found` });
+  if (!scores || !candidateId) return res.status(400).json({ error: "candidateId and scores required" });
+  const candidate = scoreArenaCandidate(run, candidateId, scores);
+  if (!candidate) return res.status(404).json({ error: `Candidate ${candidateId} not found` });
+  res.json({ ok: true, candidate, ts: new Date().toISOString() });
+});
+
+app.post("/api/arena/select-winner", (req, res) => {
+  const { runId } = req.body;
+  const run = arenaState.runs.find(r => r.id === runId);
+  if (!run) return res.status(404).json({ error: `Arena run ${runId} not found` });
+  const winner = selectArenaWinner(run);
+  if (!winner) return res.status(400).json({ error: "No scored candidates available" });
+  res.json({ ok: true, winner, run, ts: new Date().toISOString() });
+});
+
+app.post("/api/arena/squash-merge", (req, res) => {
+  const { runId } = req.body;
+  const run = arenaState.runs.find(r => r.id === runId);
+  if (!run) return res.status(404).json({ error: `Arena run ${runId} not found` });
+  if (!run.winner) return res.status(400).json({ error: "No winner selected yet" });
+
+  run.status = "squash_merged";
+  const winner = run.candidates.find(c => c.id === run.winner);
+
+  if (storyDriver) {
+    storyDriver.ingestSystemEvent({
+      type: "ARENA_SQUASH_MERGE",
+      refs: {
+        arenaId: run.id,
+        winnerId: run.winner,
+        compositeScore: winner ? winner.compositeScore : 0,
+        title: run.title,
+      },
+      source: "arena_mode",
+    });
+  }
+
+  arenaState.activeRun = null;
+
+  res.json({
+    ok: true,
+    action: "squash_merged",
+    run,
+    commitMessage: `[Arena #${run.id}] ${run.title} — Winner: Candidate ${run.winner} (score: ${winner ? winner.compositeScore : "N/A"})`,
+    ts: new Date().toISOString(),
+  });
+});
+
+app.get("/api/arena/config", (req, res) => {
+  const arenaConfig = loadYamlConfig("arena-mode.yaml");
+  if (!arenaConfig) return res.status(404).json({ error: "Arena Mode config not found" });
+  res.json({ ok: true, ...arenaConfig, ts: new Date().toISOString() });
+});
+
+app.get("/api/build-any-app", (req, res) => {
+  const baaConfig = loadYamlConfig("build-any-app.yaml");
+  if (!baaConfig) return res.status(404).json({ error: "Build Any App config not found" });
+  res.json({ ok: true, ...baaConfig, ts: new Date().toISOString() });
 });
 
 // ─── Error Handler ──────────────────────────────────────────────────

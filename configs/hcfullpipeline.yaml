@@ -96,12 +96,51 @@ pipeline:
         noProxy: true
         maxParallelAgents: 6
 
+    - id: arena-evaluate
+      name: Arena Evaluate
+      description: >
+        Run Heady Arena Mode on non-trivial outputs from execute phase.
+        Generate candidate variants, score across multi-metric dimensions
+        (correctness, performance, resource efficiency, maintainability,
+        stability, historical reliability), select winner via intelligent
+        scoring informed by all Heady intelligence, and squash-merge into
+        target branch. Feeds results to Story Driver.
+      checkpoint: true
+      parallel: true
+      dependsOn: [execute-major-phase]
+      tasks:
+        - identify_arena_candidates
+        - run_arena_scoring
+        - select_arena_winner
+        - squash_merge_winner
+        - archive_losing_candidates
+        - log_arena_to_story_driver
+      arenaConfig:
+        defaultCandidates: 3
+        maxCandidates: 5
+        scoringWeights:
+          correctness: 0.30
+          performance: 0.20
+          resource_efficiency: 0.15
+          maintainability: 0.15
+          stability: 0.10
+          historical_reliability: 0.10
+        minimumThresholds:
+          correctness: 0.80
+          stability: 0.70
+        intelligenceInputs:
+          - registry_patterns
+          - resource_signals
+          - story_context
+          - user_preferences
+          - pipeline_state
+
     - id: recover
       name: Recover
       description: Handle partial failures, apply saga compensation, circuit breakers
       checkpoint: true
       parallel: false
-      dependsOn: [execute-major-phase]
+      dependsOn: [arena-evaluate]
       tasks:
         - evaluate_failures
         - apply_compensation
@@ -139,6 +178,8 @@ pipeline:
       - configs/service-catalog.yaml
       - configs/governance-policies.yaml
       - configs/concepts-index.yaml
+      - configs/arena-mode.yaml
+      - configs/build-any-app.yaml
     escalationThreshold:
       readinessBelow: 70
       errorRateAbove: 0.10

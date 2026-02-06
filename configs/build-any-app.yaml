@@ -1,0 +1,291 @@
+# HEADY_BRAND:BEGIN
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  █╗  █╗███████╗ █████╗ ██████╗ █╗   █╗                     ║
+# ║  █║  █║█╔════╝█╔══█╗█╔══█╗╚█╗ █╔╝                     ║
+# ║  ███████║█████╗  ███████║█║  █║ ╚████╔╝                      ║
+# ║  █╔══█║█╔══╝  █╔══█║█║  █║  ╚█╔╝                       ║
+# ║  █║  █║███████╗█║  █║██████╔╝   █║                        ║
+# ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                        ║
+# ║                                                                  ║
+# ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
+# ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║  FILE: configs/build-any-app.yaml                                  ║
+# ║  LAYER: root                                                      ║
+# ╚══════════════════════════════════════════════════════════════════╝
+# HEADY_BRAND:END
+
+#
+# Build Any App — Standardized Pattern for Intelligent App Development
+#
+# Every app (browser, IDE, website, backend, mobile, service) follows the
+# same agent-driven, pipeline-first, Arena-evaluated pattern. This config
+# defines the universal process that makes every new product a first-class
+# citizen in the Heady ecosystem.
+
+version: "1.0.0"
+
+buildAnyApp:
+  name: Build Any App Pattern
+  description: >
+    Use the same intelligent, agent-driven pattern for every app built with
+    Heady. Treat each app as an HCFullPipeline project with agents mapped to
+    each SDLC phase, standardized architecture patterns, agentic CI/CD, Arena
+    Mode evaluation, and continuous learning feedback loops.
+
+  # ─── STANDING DIRECTIVE ────────────────────────────────────────────────
+  standingDirective: >
+    For all Heady projects and services, you must:
+    1. Run HCFullPipeline continuously as the primary way to plan, execute, and track work.
+    2. Use Heady Arena Mode as the standard evaluation path for non-trivial changes.
+    3. Base Arena decisions on all available Heady intelligence.
+    4. When a candidate wins, perform an intelligent squash-merge into the target branch.
+    5. Keep doing this on an ongoing basis so code, patterns, prompts, and policies
+       all evolve through HCFullPipeline + Arena, not through ad-hoc changes.
+
+  # ─── PHASE 1: PIPELINE FIRST ──────────────────────────────────────────
+  pipelineFirst:
+    description: >
+      For any new app, create an HCFullPipeline project before writing code.
+    stages:
+      - id: spec
+        name: Spec & Define
+        tasks:
+          - Write requirements document before any code
+          - Define target OSs, UX goals, constraints
+          - Agents derive user stories and estimate risk
+          - Socratic questions to refine scope
+      - id: design
+        name: Design & Architecture
+        tasks:
+          - Propose architecture patterns (from pattern catalog)
+          - Define integration points with Heady system
+          - Create API contracts and data schemas
+          - Arena Mode for major design decisions
+      - id: build
+        name: Build & Integrate
+        tasks:
+          - Scaffold with coding agents following patterns
+          - Wire services, UI, installer, integrations
+          - Use HeadyAutoIDE as canonical coding environment
+          - Parallel execution of independent modules
+      - id: test
+        name: Test & Validate
+        tasks:
+          - Unit, integration, and property-based tests
+          - Arena Mode for UX flows and feature implementations
+          - Performance benchmarks against budgets
+          - Security scanning and compliance checks
+      - id: secure
+        name: Secure & Observe
+        tasks:
+          - Threat modeling, auth, secrets management
+          - Telemetry, crash reporting, structured logging
+          - Resource management hooks (CPU/RAM/GPU per component)
+          - Observability dashboards
+      - id: deploy
+        name: Deploy & Operate
+        tasks:
+          - Release channels (dev, beta, stable)
+          - Auto-update system, signed binaries
+          - CI/CD pipelines per platform
+          - Rollback plans
+      - id: learn
+        name: Learn & Evolve
+        tasks:
+          - Feedback loops from users and telemetry
+          - Story Driver tracks milestones and experiments
+          - Pattern catalog updated with learnings
+          - Feature roadmap derived from evidence
+
+  # ─── PHASE 2: AGENTS PER SDLC PHASE ───────────────────────────────────
+  agentsPerPhase:
+    description: >
+      Specialized agents operate at each phase of the software development
+      lifecycle. Each agent has defined responsibilities and tier allocation.
+    agents:
+      - phase: planning
+        agent: Planner
+        tier: M
+        tasks:
+          - Summarize requirements, derive user stories
+          - Estimate risk and resource needs
+          - Create task decomposition
+      - phase: design
+        agent: Architect
+        tier: M
+        tasks:
+          - Propose architecture patterns
+          - Select from pattern catalog
+          - Define contracts and schemas
+      - phase: coding
+        agent: Implementer
+        tier: M
+        tasks:
+          - Scaffold, implement, and refactor
+          - Follow established patterns and styles
+          - Generate code via HeadyAutoIDE
+      - phase: quality
+        agent: TestWriter
+        tier: M
+        tasks:
+          - Generate tests and run static analysis
+          - Review PRs and flag risky changes
+          - Property-based testing for edge cases
+      - phase: security
+        agent: SecurityChecker
+        tier: M
+        tasks:
+          - Vulnerability scanning, secret detection
+          - Threat modeling, input validation
+          - Compliance verification
+      - phase: evaluation
+        agent: Evaluator
+        tier: L
+        tasks:
+          - Review for security, performance, edge cases
+          - Question assumptions and alternatives
+          - Arena Mode scoring and recommendation
+      - phase: ops
+        agent: SREAgent
+        tier: M
+        tasks:
+          - Create IaC, CI/CD pipelines
+          - Monitoring, alerting, deployment automation
+          - Canary/rollback decision support
+
+  # ─── PHASE 3: STANDARDIZED PATTERNS ───────────────────────────────────
+  patternCatalog:
+    description: >
+      Always pick from the pattern catalog first. If no suitable pattern
+      exists, propose a new one and mark it experimental.
+    categories:
+      - name: App Patterns
+        patterns:
+          - SPA (Single Page Application)
+          - API Service
+          - Workflow Engine
+          - Browser-style Wrapper (Chromium/Electron)
+          - Desktop Overlay (Electron always-on-top)
+          - Mobile Companion
+          - CLI Tool
+      - name: Integration Patterns
+        patterns:
+          - Orchestrator-Worker
+          - Event-Driven
+          - Blackboard
+          - Pub-Sub
+          - Request-Reply
+      - name: Reliability Patterns
+        patterns:
+          - Circuit Breaker
+          - Retry with Backoff
+          - Bulkhead
+          - Queue-Backed Work
+          - Saga Compensation
+      - name: Data Patterns
+        patterns:
+          - CQRS
+          - Event Sourcing
+          - Cache-Aside
+          - Write-Through Cache
+
+  # ─── PHASE 4: AGENTIC CI/CD ───────────────────────────────────────────
+  agenticCICD:
+    description: >
+      For each app, generate CI/CD pipelines once and reuse the pattern.
+      Agents assist with PR summarization, risk analysis, and deployment.
+    pipeline:
+      stages:
+        - build
+        - test
+        - security_checks
+        - package
+        - deploy
+        - smoke_tests
+    agentCapabilities:
+      - Summarize PRs and flag risky changes
+      - Analyze deployment risk
+      - Decide on canary vs full rollout
+      - Recommend rollback when needed
+      - Generate release notes from Story Driver
+
+  # ─── PHASE 5: ARENA MODE FOR EVERY DECISION ───────────────────────────
+  arenaForDecisions:
+    description: >
+      Whenever there are multiple viable approaches, use Arena Mode.
+      This applies to algorithms, UI flows, prompts, CI pipelines, and
+      architecture choices.
+    applicableTo:
+      - Feature implementations
+      - UX/UI flows
+      - Prompt tuning
+      - CI/CD pipeline configurations
+      - Architecture decisions
+      - Resource routing policies
+    process:
+      - Generate N candidates
+      - Score with multi-metric evaluation
+      - Select winner via Arena
+      - Squash-merge winner into main
+      - Archive the rest
+      - Log to Story Driver
+
+  # ─── PHASE 6: OBSERVABILITY AS MANDATORY ──────────────────────────────
+  mandatoryObservability:
+    description: >
+      Every app must emit metrics, logs, and traces into the shared
+      observability stack. Events feed the Story Driver and learning loops.
+    requirements:
+      - Metrics: latency, error rate, throughput, resource usage
+      - Logs: structured JSON, trace_id correlation
+      - Traces: distributed tracing for cross-service calls
+      - Events: pipeline events, build events, deploy events
+      - Story: feed milestones to Story Driver
+    usage:
+      - Spot regressions quickly
+      - Let agents propose optimizations
+      - Track key metrics per app (reliability, speed, cost, user success)
+
+  # ─── PHASE 7: CONTINUOUS LEARNING ──────────────────────────────────────
+  continuousLearning:
+    description: >
+      For each app, track what works and what doesn't. Feed learnings
+      back into the system so every future app benefits.
+    activities:
+      - Track key metrics (reliability, speed, cost, user success)
+      - Log which agent suggestions were accepted vs rejected
+      - Update prompts and patterns based on outcomes
+      - Run periodic agentic "retro" tasks for tech debt and upgrades
+      - Story Driver maintains institutional knowledge
+
+  # ─── EXAMPLE: HEADYBROWSER ────────────────────────────────────────────
+  exampleApp:
+    name: HeadyBrowser
+    description: Chromium-based AI Browser — example of building an app with this pattern
+    stages:
+      spec:
+        - Requirements: Chromium-based, HeadyBuddy sidebar, agent mode, cross-platform
+        - Target OSs: Windows, macOS, Linux
+        - UX goals: seamless AI assistance while browsing
+      design:
+        - Core engine: Chromium fork or embedding
+        - HeadyBuddy sidebar integration points
+        - Profile management, settings, privacy architecture
+        - Resource management hooks (per-tab CPU/RAM/GPU)
+      build:
+        - MCP tools: mcp.build_browser(platform), mcp.run_browser_tests(platform, suite)
+        - python-worker for heavy builds and tests
+        - React-based WebUI for settings/new-tab page
+        - Arena Mode for sidebar layout decisions
+      test:
+        - Smoke tests: launch browser, open pages, verify HeadyBuddy
+        - Integration tests per platform
+        - Performance benchmarks (tab load time, memory per tab)
+      deploy:
+        - Release channels: dev, beta, stable
+        - Installer and auto-update system
+        - Signed binaries per platform
+      observe:
+        - ResourceUsageEvents per process/tab (CPU, RAM, GPU)
+        - Crash rates and top issues per version
+        - User success metrics

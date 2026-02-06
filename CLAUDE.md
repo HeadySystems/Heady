@@ -58,7 +58,7 @@ and remote.
 The pipeline runs in strict dependency order with checkpoints at each stage:
 
 ```
-ingest → plan → execute-major-phase → recover → finalize
+ingest → plan → execute-major-phase → arena-evaluate → recover → finalize
 ```
 
 Each stage is defined in `configs/hcfullpipeline.yaml`. At every checkpoint,
@@ -181,6 +181,16 @@ curl localhost:3300/api/checkpoint/records                                    # 
 # Combined overview
 curl localhost:3300/api/subsystems                                           # All subsystem status
 curl localhost:3300/api/agents/claude-code/status                            # Claude Code agent status
+
+# Arena Mode
+curl localhost:3300/api/arena/runs                                          # All arena runs
+curl localhost:3300/api/arena/active                                        # Active arena run
+curl -X POST localhost:3300/api/arena/create -d '{"title":"Feature X","candidates":3}'  # Create arena run
+curl -X POST localhost:3300/api/arena/score -d '{"runId":1,"candidateId":"A","scores":{...}}'  # Score candidate
+curl -X POST localhost:3300/api/arena/select-winner -d '{"runId":1}'        # Select winner
+curl -X POST localhost:3300/api/arena/squash-merge -d '{"runId":1}'         # Squash-merge winner
+curl localhost:3300/api/arena/config                                        # Arena config
+curl localhost:3300/api/build-any-app                                       # Build Any App pattern
 
 # System status
 curl localhost:3300/api/health                    # Health check
