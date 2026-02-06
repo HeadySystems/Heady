@@ -1,25 +1,7 @@
 {
-  "users": [
-    {
-      "id": "af7b341a-9d6a-4618-83bf-435d398e3bc1",
-      "name": "Test User",
-      "email": "test@example.com",
-      "plan": "starter",
-      "status": "active",
-      "apiKey": "hdy_c7ee15ea8511e2e43f6ae1457176d35725321abcb618f1e5",
-      "usage": 0,
-      "dailyUsage": 0,
-      "dailyUsageDate": "2026-02-06",
-      "stripeCustomerId": null,
-      "stripeSubscriptionId": null,
-      "createdAt": "2026-02-06T13:29:40.893Z",
-      "lastActive": null,
-      "authorizedAt": "2026-02-06T13:29:52.527Z"
-    }
-  ],
+  "users": [],
   "metadata": {
     "createdAt": "2026-02-06T13:00:00.000Z",
-    "version": "1.0.0",
-    "updatedAt": "2026-02-06T13:29:52.527Z"
+    "version": "1.0.0"
   }
 }
