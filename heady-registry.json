@@ -212,6 +212,69 @@
       "lastUpdated": "2026-02-06"
     },
     {
+      "id": "heady-browser",
+      "name": "HeadyBrowser",
+      "type": "browser",
+      "version": "1.0.0",
+      "sourceOfTruth": "docs/HEADY_BROWSER_BUDDY_IDE_PROTOCOL.md",
+      "responsibilities": ["tabbedBrowsing", "adBlocking", "trackingProtection", "buddySidebar", "workspaces", "featureFusion", "crossPlatformSync"],
+      "platforms": ["android", "windows", "linux"],
+      "ownership": "core",
+      "status": "planned",
+      "criticality": "high",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "buddy-always-on",
+      "name": "BuddyAlwaysOn",
+      "type": "service",
+      "version": "1.0.0",
+      "sourceOfTruth": "configs/heady-buddy-always-on.yaml",
+      "responsibilities": ["alwaysOnAssistant", "foregroundService", "trayApp", "systemdService", "llmRouter", "encryptedMemory", "crossPlatformSync"],
+      "platforms": ["android", "windows", "linux"],
+      "ownership": "core",
+      "status": "planned",
+      "criticality": "critical",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "phone-ssh",
+      "name": "PhoneSSH",
+      "type": "infrastructure",
+      "version": "1.0.0",
+      "sourceOfTruth": "scripts/phone-ssh-setup.sh",
+      "responsibilities": ["sshAccess", "termuxSetup", "remoteManagement", "autoStartBoot"],
+      "platforms": ["android"],
+      "ownership": "core",
+      "status": "active",
+      "criticality": "medium",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "heady-auto-ide",
+      "name": "HeadyAutoIDE",
+      "type": "orchestration",
+      "version": "1.0.0",
+      "sourceOfTruth": "docs/HEADY_AUTO_IDE.md",
+      "responsibilities": ["masterOrchestrator", "agentHierarchy", "communicationRouting", "twoBaseFusion", "verticalPlanning", "connectionKits", "allFollowMode"],
+      "ownership": "core",
+      "status": "active",
+      "criticality": "critical",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "connection-kits",
+      "name": "HeadyConnectionKits",
+      "type": "distribution",
+      "version": "1.0.0",
+      "sourceOfTruth": "HeadyConnectionKits/",
+      "responsibilities": ["cloudWebAccess", "dockerOnPrem", "kubernetesMarketplaces", "cliTools", "sdksSnippets", "apiPostman", "emailOnboarding", "enterpriseCompliance", "customIntegrations"],
+      "ownership": "core",
+      "status": "active",
+      "criticality": "high",
+      "lastUpdated": "2026-02-06"
+    },
+    {
       "id": "desktop-overlay",
       "name": "DesktopOverlay",
       "type": "desktop-app",
@@ -222,6 +285,66 @@
       "status": "active",
       "criticality": "low",
       "lastUpdated": "2025-07-01"
+    },
+    {
+      "id": "headybrowser-mobile",
+      "name": "HeadyBrowser Mobile",
+      "type": "mobile-app",
+      "version": "0.1.0",
+      "sourceOfTruth": "headybrowser-mobile/",
+      "responsibilities": ["mobileBrowsing", "adBlocking", "aiSidebar", "crossDeviceSync"],
+      "ownership": "core",
+      "status": "scaffold",
+      "criticality": "high",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "headybrowser-desktop",
+      "name": "HeadyBrowser Desktop",
+      "type": "desktop-app",
+      "version": "0.1.0",
+      "sourceOfTruth": "headybrowser-desktop/",
+      "responsibilities": ["desktopBrowsing", "adBlocking", "aiSidebar", "extensions", "crossDeviceSync"],
+      "ownership": "core",
+      "status": "scaffold",
+      "criticality": "high",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "headybuddy-mobile",
+      "name": "HeadyBuddy Mobile",
+      "type": "mobile-app",
+      "version": "0.1.0",
+      "sourceOfTruth": "headybuddy-mobile/",
+      "responsibilities": ["alwaysOnCompanion", "foregroundService", "shareTarget", "floatingBubble"],
+      "ownership": "core",
+      "status": "scaffold",
+      "criticality": "high",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "heady-ide",
+      "name": "HeadyIDE",
+      "type": "web-ide",
+      "version": "1.0.0",
+      "sourceOfTruth": "configs/heady-ide.yaml",
+      "responsibilities": ["codeServer", "aiAssistant", "crossDeviceAccess", "sacredGeometryTheme"],
+      "ownership": "core",
+      "status": "planned",
+      "criticality": "high",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "termux-bootstrap",
+      "name": "Termux Bootstrap",
+      "type": "script",
+      "version": "1.0.0",
+      "sourceOfTruth": "scripts/termux-bootstrap.sh",
+      "responsibilities": ["phoneSSH", "phoneServer", "remoteAccess", "autoStart"],
+      "ownership": "core",
+      "status": "active",
+      "criticality": "medium",
+      "lastUpdated": "2026-02-06"
     },
     {
       "id": "aloha-protocol",
@@ -379,6 +502,16 @@
       "inputs": ["git-remotes"],
       "outputs": ["synced-repos"],
       "dependencies": [],
+      "status": "active"
+    },
+    {
+      "id": "two-base-fusion",
+      "name": "Two-Base Fusion",
+      "owner": "core",
+      "sourceOfTruth": ".windsurf/workflows/two-base-fusion.md",
+      "inputs": ["baseA", "baseB", "verticalContext"],
+      "outputs": ["fusedArchitecture", "phasedRoadmap", "agentAssignments"],
+      "dependencies": ["heady-auto-ide"],
       "status": "active"
     },
     {
@@ -618,6 +751,41 @@
       "lastUpdated": "2026-02-06"
     },
     {
+      "id": "multi-agent-transparency",
+      "path": "docs/MULTI_AGENT_TRANSPARENCY.md",
+      "type": "governance",
+      "status": "current",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "iterative-rebuild-protocol",
+      "path": "docs/ITERATIVE_REBUILD_PROTOCOL.md",
+      "type": "governance",
+      "status": "current",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "headystack-distribution-protocol",
+      "path": "docs/HEADY_STACK_DISTRIBUTION_PROTOCOL.md",
+      "type": "architecture",
+      "status": "current",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "cross-platform-protocol",
+      "path": "docs/HEADY_CROSS_PLATFORM_PROTOCOL.md",
+      "type": "deployment-protocol",
+      "status": "current",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "heady-ide-config",
+      "path": "configs/heady-ide.yaml",
+      "type": "config",
+      "status": "current",
+      "lastUpdated": "2026-02-06"
+    },
+    {
       "id": "copilot-instructions",
       "path": ".github/copilot-instructions.md",
       "type": "agent-protocol",
@@ -642,6 +810,41 @@
       "id": "stability-first-config",
       "path": "configs/stability-first.yaml",
       "type": "config",
+      "status": "current",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "browser-buddy-ide-protocol",
+      "path": "docs/HEADY_BROWSER_BUDDY_IDE_PROTOCOL.md",
+      "type": "architecture",
+      "status": "current",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "heady-browser-config",
+      "path": "configs/heady-browser.yaml",
+      "type": "config",
+      "status": "current",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "buddy-always-on-config",
+      "path": "configs/heady-buddy-always-on.yaml",
+      "type": "config",
+      "status": "current",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "heady-auto-ide-doc",
+      "path": "docs/HEADY_AUTO_IDE.md",
+      "type": "system-prompt",
+      "status": "current",
+      "lastUpdated": "2026-02-06"
+    },
+    {
+      "id": "connection-kits-overview",
+      "path": "HeadyConnectionKits/00-Overview/README.md",
+      "type": "distribution",
       "status": "current",
       "lastUpdated": "2026-02-06"
     }
