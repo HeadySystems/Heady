@@ -73,3 +73,6 @@ AndroidSDK/system-images/**/*.img
 # Deploy packages (temp build artifacts)
 deploy-package-*/
 offline-packages/
+
+# Local Netlify folder
+.netlify
