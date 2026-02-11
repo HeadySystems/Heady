@@ -101,8 +101,8 @@ backend_services:
       - http
       - grpc
     queue_connections:
-      - redis://cache.heady.internal:6379
-      - postgres://db.heady.internal:5432
+      - redis://cache.headysystems.com:6379
+      - postgres://db.headysystems.com:5432
 
   render_mcp_server:
     description: "Render.com MCP server"
@@ -310,15 +310,15 @@ imagination_services:
 localhost_replacements:
   # Old localhost references and their new domain equivalents
   - old: "http://localhost:3300"
-    new: "https://manager.heady.internal"
+    new: "https://manager.headysystems.com"
     service: "heady_manager"
     
   - old: "http://127.0.0.1:3300"
-    new: "https://manager.heady.internal"
+    new: "https://manager.headysystems.com"
     service: "heady_manager"
     
   - old: "http://localhost:5000"
-    new: "https://worker.heady.internal"
+    new: "https://worker.headysystems.com"
     service: "python_worker"
     
   - old: "https://app.headysystems.com"
@@ -330,15 +330,15 @@ localhost_replacements:
     service: "public_site"
     
   - old: "redis://localhost:6379"
-    new: "redis://cache.heady.internal:6379"
+    new: "redis://cache.headysystems.com:6379"
     service: "redis"
     
   - old: "postgresql://localhost:5432"
-    new: "postgresql://db.heady.internal:5432"
+    new: "postgresql://db.headysystems.com:5432"
     service: "postgres"
     
   - old: "ws://localhost:3300"
-    new: "wss://manager.heady.internal"
+    new: "wss://manager.headysystems.com"
     service: "heady_manager_websocket"
 
 # ============================================================================
@@ -402,11 +402,11 @@ dns_configuration:
     # Use /etc/hosts or local DNS resolver
     method: "hosts_file"
     hosts_entries: |
-      127.0.0.1 manager.heady.internal
-      127.0.0.1 worker.heady.internal
+      127.0.0.1 manager.headysystems.com
+      127.0.0.1 worker.headysystems.com
       127.0.0.1 dashboard.heady.local
-      127.0.0.1 cache.heady.internal
-      127.0.0.1 db.heady.internal
+      127.0.0.1 cache.headysystems.com
+      127.0.0.1 db.headysystems.com
       127.0.0.1 www.heady.local
       127.0.0.1 api.heady.local
       127.0.0.1 metrics.heady.local
@@ -417,10 +417,10 @@ dns_configuration:
     # Docker network DNS
     network_name: "heady_internal"
     aliases:
-      manager: ["manager.heady.internal", "api.heady.local"]
-      worker: ["worker.heady.internal"]
-      postgres: ["db.heady.internal"]
-      redis: ["cache.heady.internal"]
+      manager: ["manager.headysystems.com", "api.heady.local"]
+      worker: ["worker.headysystems.com"]
+      postgres: ["db.headysystems.com"]
+      redis: ["cache.headysystems.com"]
       
   kubernetes:
     # K8s service DNS

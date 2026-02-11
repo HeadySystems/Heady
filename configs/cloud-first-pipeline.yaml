@@ -33,7 +33,7 @@ clouds:
     description: "Personal development cloud — all changes start here"
     git_remote: "heady-me"
     git_url: "git@github.com:HeadyMe/Heady.git"
-    render_url: "https://heady-manager-headyme.onrender.com"
+    cloud_url: "https://me.headysystems.com"
     role: development
     auto_deploy: true
     auto_train: true
@@ -52,7 +52,7 @@ clouds:
     description: "Production live — only receives 100% validated changes"
     git_remote: "origin"
     git_url: "git@github.com:HeadySystems/Heady.git"
-    render_url: "https://heady-manager-headysystems.onrender.com"
+    cloud_url: "https://api.headysystems.com"
     role: production
     auto_deploy: false
     gate_required: true
@@ -60,7 +60,7 @@ clouds:
   connection:
     name: "HeadyConnection"
     description: "Cross-cloud sync and connection hub"
-    render_url: "https://heady-manager-headyconnection.onrender.com"
+    cloud_url: "https://api.headyconnection.org"
     role: sync
     auto_deploy: true
 
@@ -193,12 +193,12 @@ training:
 # SERVICE ENDPOINTS (Cloud-Only)
 # ============================================================================
 endpoints:
-  manager: "https://heady-manager-headyme.onrender.com"
-  api: "https://heady-manager-headyme.onrender.com/api"
-  health: "https://heady-manager-headyme.onrender.com/api/health"
+  manager: "https://me.headysystems.com"
+  api: "https://me.headysystems.com/api"
+  health: "https://me.headysystems.com/api/health"
   train: "https://brain.headysystems.com/api/v1/train"
-  mcp: "https://heady-manager-headyme.onrender.com/mcp"
-  dashboard: "https://heady-manager-headyme.onrender.com"
+  mcp: "https://me.headysystems.com/mcp"
+  dashboard: "https://me.headysystems.com"
 
 # ============================================================================
 # POLICIES

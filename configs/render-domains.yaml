@@ -5,8 +5,8 @@
 services:
   # HeadyManager Production
   heady-manager-headysystems:
-    render_url: "heady-manager-headysystems.onrender.com"
-    custom_domains:
+    primary_domain: "api.headysystems.com"
+    domains:
       - "admin.headysystems.com"
       - "api.headysystems.com"
     environment:
@@ -14,23 +14,23 @@ services:
       ADMIN_URL: "https://admin.headysystems.com"
 
   # HeadyManager Staging
-  heady-manager-staging-headysystems:
-    render_url: "heady-manager-staging-headysystems.onrender.com"
-    custom_domains:
+  heady-manager-staging:
+    primary_domain: "api.staging.headysystems.com"
+    domains:
       - "api.staging.headysystems.com"
     environment:
       BASE_URL: "https://api.staging.headysystems.com"
 
   # HeadyApp Production
-  heady-app-headysystems:
-    render_url: "heady-app-headysystems.onrender.com"
-    custom_domains:
+  heady-app:
+    primary_domain: "app.headysystems.com"
+    domains:
       - "app.headysystems.com"
     environment:
       BASE_URL: "https://app.headysystems.com"
 
 # Configuration Notes
-# 1. Each service must have custom domains configured in Render dashboard
-# 2. Environment variables should use the canonical domains
-# 3. DNS records must point to the Render service URL
-# 4. SSL certificates will be automatically provisioned by Render
+# 1. All services use branded custom domains via Cloudflare
+# 2. Environment variables use canonical branded domains only
+# 3. DNS records managed in Cloudflare
+# 4. SSL certificates auto-provisioned via Cloudflare

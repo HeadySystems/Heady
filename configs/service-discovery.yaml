@@ -14,8 +14,8 @@
 # ╚══════════════════════════════════════════════════════════════════╝
 # HEADY_BRAND:END
 # Heady Service Discovery & Domain Architecture
-# Replaces all localhost references with proper internal domains
-# Root Domain: heady.internal
+# Replaces all localhost references with branded domains
+# Root Domain: headysystems.com
 
 root_domain: internal.headyio.com
 environment: dev  # dev, staging, prod
@@ -25,7 +25,7 @@ region: local
 services:
   # Manager/Orchestrator
   manager:
-    host: manager.internal.headyio.com
+    host: manager.dev.local.headyio.com
     port: 3300
     protocol: http
     aliases:

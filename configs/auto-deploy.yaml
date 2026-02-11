@@ -21,7 +21,7 @@ targets:
   - name: "headyme-primary"
     type: "cloud"
     git_remote: "heady-me"
-    render_url: "https://heady-manager-headyme.onrender.com"
+    cloud_url: "https://me.headysystems.com"
     branch: "main"
     role: "primary"
     auto_deploy: true
@@ -41,7 +41,7 @@ targets:
   - name: "headysystems-production"
     type: "cloud"
     git_remote: "origin"
-    render_url: "https://heady-manager-headysystems.onrender.com"
+    cloud_url: "https://api.headysystems.com"
     branch: "main"
     role: "production"
     auto_deploy: false
@@ -52,7 +52,7 @@ targets:
   # HeadyConnection (SYNC hub)
   - name: "headyconnection-sync"
     type: "cloud"
-    render_url: "https://heady-manager-headyconnection.onrender.com"
+    cloud_url: "https://api.headyconnection.org"
     role: "sync"
     auto_deploy: true
     redundancy: 1

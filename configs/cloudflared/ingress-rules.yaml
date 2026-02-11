@@ -8,14 +8,14 @@ ingress:
     originRequest:
       noTLSVerify: true
 
-  - hostname: api.internal.headymcp.com
+  - hostname: api.headymcp.com
     service: https://localhost:8443
     originRequest:
       caPool: /etc/cloudflared/ca.crt
       clientTLS:
         cert: /etc/cloudflared/client.pem
         key: /etc/cloudflared/client.key
-  - hostname: "*.internal.headymcp.com"
+  - hostname: "*.headymcp.com"
     service: https://localhost:8443
     originRequest:
       caPool: /etc/cloudflared/ca.crt

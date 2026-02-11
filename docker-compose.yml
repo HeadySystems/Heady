@@ -28,7 +28,8 @@ services:
       - USE_HEADY_MANAGER=${USE_HEADY_MANAGER:-true}
       - HEADY_TARGET=CloudOnly
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://manager.heady.internal:3300/api/health"]
+      # NOTE: localhost is required here — healthcheck runs inside the container
+      test: ["CMD", "wget", "-qO-", "http://localhost:3300/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -37,8 +38,8 @@ services:
     networks:
       heady-main-network:
         aliases:
-          - manager.heady.internal
-          - api.heady.internal
+          - manager.headysystems.com
+          - api.headysystems.com
     volumes:
       - heady-data:/app/data
       - heady-logs:/app/logs

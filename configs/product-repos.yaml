@@ -75,12 +75,13 @@ products:
     dns:
       cloudflare_zone: headyme.com
       records:
+        # DNS CNAME targets are infrastructure-only (Cloudflare proxied)
         - type: CNAME
           name: "@"
-          target: heady-me-web.onrender.com
+          target: me.headysystems.com
         - type: CNAME
           name: www
-          target: heady-me-web.onrender.com
+          target: me.headysystems.com
 
   HeadyConnection:
     repo: HeadyConnection/HeadyConnection
@@ -113,9 +114,10 @@ products:
     dns:
       cloudflare_zone: headyconnection.org
       records:
+        # DNS CNAME target is infrastructure-only (Cloudflare proxied)
         - type: CNAME
           name: "@"
-          target: heady-connection-web.onrender.com
+          target: api.headyconnection.org
 
   HeadyWeb:
     repo: HeadySystems/HeadyWeb

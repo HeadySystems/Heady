@@ -174,10 +174,10 @@ continuous_improvement:
 domain_governance:
   description: "Domain naming and security standards"
   rules:
-    - "No .onrender.com references in user-facing contexts"
+    - "No .onrender.com references anywhere — branded domains only"
     - "All production domains must use HTTPS"
     - "Custom domains must be configured in Cloudflare"
-    - "Render origins should only be used in DNS and backend configs"
+    - "All endpoints use branded headysystems.com / headyconnection.org domains"
     - "All OAuth/webhook callbacks must use canonical domains"
   
   enforcement:

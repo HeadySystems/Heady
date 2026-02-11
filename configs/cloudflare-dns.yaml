@@ -1,6 +1,9 @@
 # HEADY CLOUDFLARE DNS CONFIGURATION
-# Version: 1.0.0
-# Last Updated: 2026-02-09
+# Version: 1.1.0
+# Last Updated: 2026-02-11
+#
+# INFRASTRUCTURE-ONLY: CNAME targets below reference the hosting provider.
+# Users and code NEVER see these — all traffic uses branded domains via Cloudflare proxy.
 
 # Production DNS Records
 records:
@@ -45,7 +48,8 @@ headers:
   x_frame_options: "DENY"
   x_content_type_options: "nosniff"
 
-# Notes
-# 1. All records should point to Render services but use branded domains
-# 2. Proxied=true enables Cloudflare's CDN and security features
-# 3. TTL=1 sets automatic TTL for dynamic environments
+# Infrastructure Notes
+# 1. CNAME targets are hosting provider addresses — NOT user-facing
+# 2. proxied=true means users only see branded domains (Cloudflare proxy)
+# 3. Code and configs must ONLY reference branded domains, never these targets
+# 4. TTL=1 sets automatic TTL for dynamic environments

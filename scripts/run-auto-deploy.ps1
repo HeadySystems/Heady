@@ -9,9 +9,9 @@ $ErrorActionPreference = 'Continue'
 Set-Location 'C:\Users\erich\Heady'
 
 $CloudEndpoints = @{
-    HeadyMe         = 'https://heady-manager-headyme.onrender.com'
-    HeadySystems    = 'https://heady-manager-headysystems.onrender.com'
-    HeadyConnection = 'https://heady-manager-headyconnection.onrender.com'
+    HeadyMe         = 'https://me.headysystems.com'
+    HeadySystems    = 'https://api.headysystems.com'
+    HeadyConnection = 'https://api.headyconnection.org'
     Brain           = 'https://brain.headysystems.com'
     BrainFallback   = '52.32.178.8'
 }

@@ -19,8 +19,8 @@ services:
   - name: HeadyBrain
     endpoint: https://brain.headysystems.com
     weight: 1.0
-  - name: LocalHeadyBrain
-    endpoint: http://localhost:3300
+  - name: HeadyBrainFallback
+    endpoint: https://api.headysystems.com
     weight: 0.1
   - name: HeadyMCP
     endpoint: https://mcp.headysystems.com
