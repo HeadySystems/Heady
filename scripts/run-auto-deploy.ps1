@@ -9,14 +9,14 @@ $ErrorActionPreference = 'Continue'
 Set-Location 'C:\Users\erich\Heady'
 
 $CloudEndpoints = @{
-    HeadyMe         = 'https://me.headysystems.com'
-    HeadySystems    = 'https://api.headysystems.com'
-    HeadyConnection = 'https://api.headyconnection.org'
-    Brain           = 'https://brain.headysystems.com'
-    BrainFallback1  = 'https://52.32.178.8'
-    BrainFallback2  = 'https://brain-backup.headysystems.com'
-    BrainEmergency  = 'https://brain-emergency.headysystems.com'
-    BrainDisaster   = 'https://brain-dr.headysystems.com'
+    HeadyMe         = 'https://headysystems.com'
+    HeadySystems    = 'https://headysystems.com/api'
+    HeadyConnection = 'https://headysystems.com/connection'
+    Brain           = 'https://headysystems.com/brain'
+    BrainFallback1  = 'https://headysystems.com/api/brain'
+    BrainFallback2  = 'https://headysystems.com/manager/brain'
+    BrainEmergency  = 'https://headysystems.com/registry/brain'
+    BrainDisaster   = 'https://headysystems.com/api/health'
     HeadyCo         = 'https://headysystems.com'
 }
 
@@ -178,11 +178,11 @@ if ($SkipTrain) {
 } else {
     # AGGRESSIVE BRAIN RECOVERY - 100% FUNCTIONALITY REQUIRED - CLOUD ONLY
     $brainEndpoints = @(
-        "$($CloudEndpoints.Brain)/api/v1/train",
-        "https://$($CloudEndpoints.BrainFallback1)/api/v1/train",
-        "$($CloudEndpoints.BrainFallback2)/api/v1/train",
-        "$($CloudEndpoints.BrainEmergency)/api/v1/train",
-        "$($CloudEndpoints.BrainDisaster)/api/v1/train"
+        "https://headysystems.com/api/brain/train",
+        "https://headysystems.com/api/brain/v1/train",
+        "https://headysystems.com/manager/brain/train",
+        "https://headysystems.com/registry/brain/train",
+        "https://headysystems.com/api/health"
     )
     
     $useEndpoint = $null
