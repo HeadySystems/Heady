@@ -9,7 +9,7 @@
 // ║                                                                  ║
 // ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
 // ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-// ║  FILE: scripts/enhanced-localhost-to-domain.js                    ║
+// ║  FILE: scripts/localhost-to-domain.js                           ║
 // ║  LAYER: enhanced-automation                                       ║
 // ╚══════════════════════════════════════════════════════════════════╝
 // HEADY_BRAND:END
@@ -39,7 +39,7 @@ const CONFIG = {
     parallelProcessing: true,
     
     // File processing
-    maxFileSize: 10 * 1024 * 1024, // 10MB
+    maxFileSize: 20 * 1024 * 1024, // 20MB
     excludedDirs: [
         'node_modules', '.git', '__pycache__', '.next', 'dist', 
         'build', 'coverage', '.heady_cache', '.vscode', '.idea'
@@ -47,7 +47,7 @@ const CONFIG = {
     excludedFiles: [
         'package-lock.json', 'yarn.lock', '.env', '.env.local',
         'service-discovery.yaml', 'localhost-inventory.json',
-        'enhanced-localhost-to-domain.js'
+        'localhost-to-domain.js'
     ],
     
     // Logging
@@ -262,6 +262,10 @@ class FileProcessor {
     }
     
     shouldProcessFile(filePath) {
+        // Validate file path to prevent path traversal
+        if (!filePath || typeof filePath !== 'string') return false;
+        if (filePath.includes('..') || filePath.includes('~')) return false;
+        
         const ext = path.extname(filePath);
         const validExts = ['.js', '.ts', '.jsx', '.tsx', '.json', '.yaml', '.yml', '.md', '.html', '.py', '.go', '.sh', '.ps1', '.bat'];
         
@@ -324,13 +328,23 @@ class FileProcessor {
     }
     
     createBackup(filePath, originalContent) {
+        // Validate inputs
+        if (!filePath || typeof filePath !== 'string' || !originalContent || typeof originalContent !== 'string') {
+            throw new Error('Invalid backup parameters');
+        }
+        
+        // Prevent path traversal in backup path
+        const relativePath = path.relative(process.cwd(), filePath);
+        if (relativePath.includes('..') || relativePath.includes('~')) {
+            throw new Error('Invalid file path for backup');
+        }
+        
         const backupDir = CONFIG.backupPath;
         if (!fs.existsSync(backupDir)) {
             fs.mkdirSync(backupDir, { recursive: true });
         }
         
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const relativePath = path.relative(process.cwd(), filePath);
         const backupPath = path.join(backupDir, `${relativePath}.${timestamp}.backup`);
         const backupDirPath = path.dirname(backupPath);
         
@@ -522,6 +536,12 @@ class Validator {
 // Worker thread handler
 if (!isMainThread) {
     const { type, batch, dryRun, mappings, config } = workerData;
+    
+    // Validate worker data
+    if (!type || !Array.isArray(batch) || typeof dryRun !== 'boolean' || !mappings || !config) {
+        parentPort.postMessage({ error: 'Invalid worker data received' });
+        process.exit(1);
+    }
     
     if (type === 'process') {
         const patternMatcher = new PatternMatcher(mappings);
@@ -794,7 +814,7 @@ class EnhancedLocalhostToDomain {
     showHelp() {
         console.log('Enhanced Localhost to Domain Migration Tool v2.0');
         console.log('');
-        console.log('Usage: node enhanced-localhost-to-domain.js <command> [target] [options]');
+        console.log('Usage: node localhost-to-domain.js <command> [target] [options]');
         console.log('');
         console.log('Commands:');
         console.log('  inventory [dir]    Scan for localhost references (dry run)');
@@ -813,11 +833,11 @@ class EnhancedLocalhostToDomain {
         console.log('  LOG_LEVEL          Set logging level (debug, info, warn, error)');
         console.log('');
         console.log('Examples:');
-        console.log('  node enhanced-localhost-to-domain.js inventory ./distribution');
-        console.log('  node enhanced-localhost-to-domain.js migrate ./src --dry-run');
-        console.log('  node enhanced-localhost-to-domain.js migrate ./src --parallel');
-        console.log('  LOG_LEVEL=debug node enhanced-localhost-to-domain.js migrate ./src');
-        console.log('  node enhanced-localhost-to-domain.js hosts > hosts.txt');
+        console.log('  node localhost-to-domain.js inventory ./distribution');
+        console.log('  node localhost-to-domain.js migrate ./src --dry-run');
+        console.log('  node localhost-to-domain.js migrate ./src --parallel');
+        console.log('  LOG_LEVEL=debug node localhost-to-domain.js migrate ./src');
+        console.log('  node localhost-to-domain.js hosts > hosts.txt');
     }
 }
 
