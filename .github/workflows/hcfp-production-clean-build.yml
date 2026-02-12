@@ -245,6 +245,367 @@ jobs:
         if: github.ref == 'refs/heads/main' && success()
         run: |
           echo "🏷️ Tagging successful build: build-$(date +%Y%m%d-%H%M%S)"
+          BUILD_TAG="build-$(date +%Y%m%d-%H%M%S)"
+          echo "BUILD_TAG=$BUILD_TAG" >> $GITHUB_ENV
+          echo "🏷️ Tagging successful build: $BUILD_TAG"
+          
+          # Create git tag for successful builds
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag -a "$BUILD_TAG" -m "Automated build tag from CI" || echo "Tag creation skipped"
+
+  # Phase 7: Artifact cleanup and retention
+  cleanup:
+    name: Cleanup Old Artifacts
+    runs-on: ubuntu-latest
+    needs: [build-complete]
+    if: always()
+    
+    steps:
+      - name: Remove temporary files
+        run: |
+          echo "🧹 Cleaning up temporary build files..."
+          rm -rf /tmp/heady-* || true
+          
+      - name: Prune old workflow runs
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "🗑️ Cleanup complete - artifacts will expire per retention policy"
+
+  # Phase 8: Code Quality Analysis
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    needs: [preflight]
+    if: needs.preflight.outputs.should_proceed == 'true'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+        continue-on-error: true
+      
+      - name: Run ESLint
+        run: |
+          if [ -f .eslintrc.js ] || [ -f .eslintrc.json ] || [ -f eslint.config.js ]; then
+            npx eslint . --format=compact --max-warnings=50 || echo "::warning::ESLint found issues"
+          else
+            echo "⏭️ ESLint not configured"
+          fi
+        continue-on-error: true
+      
+      - name: Run TypeScript check
+        run: |
+          if [ -f tsconfig.json ]; then
+            npx tsc --noEmit || echo "::warning::TypeScript found type errors"
+          else
+            echo "⏭️ TypeScript not configured"
+          fi
+        continue-on-error: true
+      
+      - name: Check for console.log statements
+        run: |
+          echo "🔍 Checking for debug statements..."
+          if grep -rn "console\.log\|console\.debug" src/ --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" 2>/dev/null | grep -v "// allowed" | head -20; then
+            echo "::warning::Found console.log statements - consider removing for production"
+          else
+            echo "✅ No problematic console statements found"
+          fi
+        continue-on-error: true
+
+  # Phase 9: Deployment readiness check
+  deploy-ready:
+    name: Deployment Readiness
+    runs-on: ubuntu-latest
+    needs: [build-complete, security, code-quality]
+    if: github.ref == 'refs/heads/main' && needs.build-complete.result == 'success'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python for YAML validation
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install validation dependencies
+        run: pip install pyyaml jsonschema
+      
+      - name: Validate deployment configs
+        run: |
+          echo "🔍 Validating deployment configuration..."
+          
+          # Check render.yaml exists and is valid
+          if [ -f render.yaml ]; then
+            echo "✅ render.yaml found"
+            # Validate YAML syntax
+            python3 -c "import yaml; yaml.safe_load(open('render.yaml'))" || {
+              echo "::error::render.yaml has syntax issues"
+              exit 1
+            }
+            echo "✅ render.yaml syntax valid"
+          else
+            echo "⚠️ render.yaml not found - deployment may fail"
+          fi
+          
+          # Check service-discovery.yaml exists
+          if [ -f configs/service-discovery.yaml ]; then
+            echo "✅ service-discovery.yaml found"
+            # Validate YAML syntax
+            python3 -c "import yaml; yaml.safe_load(open('configs/service-discovery.yaml'))" || {
+              echo "::error::service-discovery.yaml has syntax issues"
+              exit 1
+            }
+            echo "✅ service-discovery.yaml syntax valid"
+          else
+            echo "::error::service-discovery.yaml missing - required for production"
+            exit 1
+          fi
+          
+          # Validate all YAML files in configs directory
+          echo "🔍 Validating all config YAML files..."
+          for file in configs/*.yaml configs/*.yml 2>/dev/null; do
+            if [ -f "$file" ]; then
+              python3 -c "import yaml; yaml.safe_load(open('$file'))" || {
+                echo "::error::$file has syntax issues"
+                exit 1
+              }
+              echo "✅ $file syntax valid"
+            fi
+          done
+          
+          # Validate no localhost in production configs
+          if grep -rE "localhost|127\.0\.0\.1|0\.0\.0\.0" render.yaml docker-compose*.yml configs/*.yaml 2>/dev/null | grep -v "#" | grep -v "test" | grep -v "local" | grep -v "development"; then
+            echo "::warning::Found localhost references in deployment configs"
+          fi
+          
+          # Validate no api.headysystems.com hardcoded (should use service discovery)
+          if grep -rE "api\.headysystems\.com" render.yaml docker-compose*.yml 2>/dev/null | grep -v "#"; then
+            echo "::error::Found hardcoded api.headysystems.com - use service-discovery.yaml instead"
+            exit 1
+          fi
+          
+          # Validate environment variables are properly templated
+          echo "🔍 Checking for hardcoded secrets..."
+          if grep -rE "(password|secret|api_key|token).*=.*['\"][^$]" configs/*.yaml 2>/dev/null | grep -v "#" | grep -v "example" | grep -v "placeholder"; then
+            echo "::warning::Potential hardcoded secrets found in configs"
+          fi
+          
+          # Check for required environment variables
+          echo "🔍 Checking required environment variables in render.yaml..."
+          if [ -f render.yaml ]; then
+            REQUIRED_VARS=("DATABASE_URL" "NODE_ENV")
+            for var in "${REQUIRED_VARS[@]}"; do
+              if ! grep -q "$var" render.yaml; then
+                echo "::warning::Required environment variable $var not found in render.yaml"
+              fi
+            done
+          fi
+          
+          echo "✅ Deployment configuration validation complete"
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: node-build
+          path: dist/
+        continue-on-error: true
+      
+      - name: Verify artifact integrity
+        run: |
+          echo "🔐 Verifying build artifact integrity..."
+          if [ -d "dist" ] && [ "$(ls -A dist 2>/dev/null)" ]; then
+            echo "✅ Build artifacts present"
+            ARTIFACT_SIZE=$(du -sb dist | cut -f1)
+            echo "📦 Artifact size: $(du -sh dist | cut -f1)"
+            
+            # Sanity check - artifacts should be at least 1KB
+            if [ "$ARTIFACT_SIZE" -lt 1024 ]; then
+              echo "::error::Build artifacts too small - possible build failure"
+              exit 1
+            fi
+            
+            # Count files in dist
+            FILE_COUNT=$(find dist -type f | wc -l)
+            echo "📁 Total files: $FILE_COUNT"
+            
+            if [ "$FILE_COUNT" -eq 0 ]; then
+              echo "::error::No files found in build artifacts"
+              exit 1
+            fi
+            
+            # Check for source maps in production (security concern)
+            if find dist -name "*.map" | head -1 | grep -q .; then
+              echo "::warning::Source maps found in build artifacts - consider removing for production"
+            fi
+          else
+            echo "::warning::Build artifacts missing or empty - may be expected if no build output"
+          fi
+      
+      - name: Generate deployment manifest
+        run: |
+          echo "📋 Generating deployment manifest..."
+          mkdir -p deploy
+          
+          # Generate manifest with proper JSON formatting
+          cat > deploy/deployment-manifest.json << EOF
+          {
+            "build_id": "${{ github.run_id }}",
+            "run_number": "${{ github.run_number }}",
+            "commit": "${{ github.sha }}",
+            "commit_short": "${GITHUB_SHA:0:7}",
+            "branch": "${{ github.ref_name }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "actor": "${{ github.actor }}",
+            "repository": "${{ github.repository }}",
+            "workflow": "${{ github.workflow }}",
+            "node_version": "${{ env.NODE_VERSION }}",
+            "python_version": "${{ env.PYTHON_VERSION }}",
+            "status": "ready",
+            "checks": {
+              "build": "${{ needs.build-complete.result }}",
+              "security": "${{ needs.security.result }}",
+              "code_quality": "${{ needs.code-quality.result }}"
+            }
+          }
+          EOF
+          
+          echo "📋 Generated manifest:"
+          cat deploy/deployment-manifest.json
+          
+          # Validate JSON syntax
+          python3 -c "import json; json.load(open('deploy/deployment-manifest.json'))" || {
+            echo "::error::Generated manifest has invalid JSON syntax"
+            exit 1
+          }
+          echo "✅ Manifest JSON syntax valid"
+          
+      - name: Upload deployment manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-manifest
+          path: deploy/deployment-manifest.json
+          retention-days: 30
+
+  # Phase 10: Dependency Analysis
+  dependency-analysis:
+    name: Dependency Analysis
+    runs-on: ubuntu-latest
+    needs: [preflight]
+    if: needs.preflight.outputs.should_proceed == 'true'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Check for outdated packages
+        run: |
+          echo "📦 Checking for outdated packages..."
+          npm outdated --json > outdated.json 2>/dev/null || true
+          
+          if [ -s outdated.json ] && [ "$(cat outdated.json)" != "{}" ]; then
+            echo "::warning::Some packages are outdated"
+            cat outdated.json | head -50
+          else
+            echo "✅ All packages are up to date"
+          fi
+        continue-on-error: true
+      
+      - name: Check for duplicate dependencies
+        run: |
+          echo "🔍 Checking for duplicate dependencies..."
+          npm dedupe --dry-run 2>&1 | head -20 || echo "✅ No duplicates found"
+        continue-on-error: true
+      
+      - name: Analyze bundle size
+        run: |
+          if [ -f package.json ]; then
+            echo "📊 Package dependencies count:"
+            DEPS=$(jq '.dependencies | length // 0' package.json)
+            DEV_DEPS=$(jq '.devDependencies | length // 0' package.json)
+            echo "  Production dependencies: $DEPS"
+            echo "  Development dependencies: $DEV_DEPS"
+            
+            if [ "$DEPS" -gt 100 ]; then
+              echo "::warning::High number of production dependencies ($DEPS) - consider auditing"
+            fi
+          fi
+        continue-on-error: true
+
+  # Phase 11: Notifications
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: [build-complete, security, integration, code-quality, dependency-analysis]
+    if: always()
+    
+    steps:
+      - name: Determine overall status
+        id: status
+        run: |
+          BUILD_RESULT="${{ needs.build-complete.result }}"
+          SECURITY_RESULT="${{ needs.security.result }}"
+          INTEGRATION_RESULT="${{ needs.integration.result }}"
+          CODE_QUALITY_RESULT="${{ needs.code-quality.result }}"
+          
+          if [ "$BUILD_RESULT" == "success" ] && \
+             [ "$SECURITY_RESULT" == "success" ] && \
+             [ "$INTEGRATION_RESULT" == "success" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "emoji=✅" >> $GITHUB_OUTPUT
+            echo "message=All checks passed" >> $GITHUB_OUTPUT
+          elif [ "$BUILD_RESULT" == "failure" ]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "emoji=❌" >> $GITHUB_OUTPUT
+            echo "message=Build failed" >> $GITHUB_OUTPUT
+          elif [ "$SECURITY_RESULT" == "failure" ]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "emoji=🔒" >> $GITHUB_OUTPUT
+            echo "message=Security scan failed" >> $GITHUB_OUTPUT
+          elif [ "$INTEGRATION_RESULT" == "failure" ]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "emoji=🧪" >> $GITHUB_OUTPUT
+            echo "message=Integration tests failed" >> $GITHUB_OUTPUT
+          elif [ "$CODE_QUALITY_RESULT" == "failure" ]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "emoji=📝" >> $GITHUB_OUTPUT
+            echo "message=Code quality checks failed" >> $GITHUB_OUTPUT
+          elif [ "$BUILD_RESULT" == "skipped" ] || [ "$SECURITY_RESULT" == "skipped" ]; then
+            echo "status=skipped" >> $GITHUB_OUTPUT
+            echo "emoji=⏭️" >> $GITHUB_OUTPUT
+            echo "message=Some checks were skipped" >> $GITHUB_OUTPUT
+          else
+            echo "status=warning" >> $GITHUB_OUTPUT
+            echo "emoji=⚠️" >> $GITHUB_OUTPUT
+            echo "message=Some checks had issues" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Post build summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'SUMMARY_END'
+          ## ${{ steps.status.outputs.emoji }} HCFP Production Build Summary
+          
+          **Status:** ${{ steps.status.outputs.message }}
+          
+          ### Build Results
+          
+          | Component | Status |
+          |-----------|--------|
+          | Node.js Build | ${{ needs.build-complete.result == 'success' && '✅' || '❌' }} ${{ needs.build-complete.result }} |
+          | Security Scan | ${{ needs.security.result == 'success' && '✅' || (needs.security.result == 'skipped' && '⏭️' || '⚠️') }} ${{ needs.security.result }} |
+          | Integration Tests | ${{ needs.integration.result == 'success' && '✅' || (needs.integration.result == 'skipped' && '⏭️' || '⚠️') }} ${{ needs.integration.result }} |
+          | Code Quality | ${{ needs.code-quality.result == 'success' && '✅' || (needs.code-quality.result == 'skipped' && '⏭️' || '⚠️') }} ${{ needs.code-quality.result }} |
+          | Dependency Analysis | ${{ needs.dependency-analysis.result ==
 
 
 

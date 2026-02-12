@@ -221,6 +221,155 @@ jobs:
         
         echo "✅ SSL configuration check completed"
 
+          # Exclude test files and local development configs
+          if grep -r "http://$domain" . \
+            --exclude-dir=".git" \
+            --exclude-dir="node_modules" \
+            --exclude-dir=".next" \
+            --exclude-dir="dist" \
+            --exclude-dir="build" \
+            --exclude-dir="coverage" \
+            --exclude-dir="__pycache__" \
+            --exclude-dir=".venv" \
+            --exclude-dir="venv" \
+            --exclude-dir=".cache" \
+            --exclude="*local*" \
+            --exclude="*test*" \
+            --exclude="*spec*" \
+            --exclude="*.log" \
+            --exclude="*.lock" \
+            2>/dev/null; then
+            echo "⚠️  WARNING: Found http://$domain (should be https://$domain)"
+          fi
+        done
+        
+        # Check for mixed content issues
+        echo "Checking for mixed content patterns..."
+        if grep -r -E "https://[^\"']+.*http://[^\"']+" \
+          --include="*.js" --include="*.ts" --include="*.jsx" --include="*.tsx" --include="*.html" --include="*.vue" --include="*.svelte" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="dist" --exclude-dir="build" 2>/dev/null; then
+          echo "⚠️  WARNING: Potential mixed content detected"
+        fi
+        
+        # Validate API endpoint consistency
+        echo "Checking API endpoint consistency..."
+        API_PATTERNS=("api.headysystems.com" "api.headyconnection.org")
+        for api in "${API_PATTERNS[@]}"; do
+          COUNT=$(grep -r "https://$api" . --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="dist" 2>/dev/null | wc -l || echo "0")
+          echo "  Found $COUNT references to https://$api"
+        done
+        
+        # Check for localhost references that should be domains
+        echo "Checking for localhost references in production code..."
+        if grep -r -E "(localhost|127\.0\.0\.1|0\.0\.0\.0)" \
+          --include="*.yaml" --include="*.yml" --include="*.json" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" \
+          --exclude="*local*" --exclude="*dev*" --exclude="*development*" \
+          --exclude="hosts-file*" --exclude="*localhost-validation*" 2>/dev/null | \
+          grep -v "localhost-validation" | grep -v "hosts-file"; then
+          echo "⚠️  WARNING: Found localhost references in production configs"
+        fi
+        
+        # Validate CORS origin patterns
+        echo "Checking CORS configuration..."
+        if grep -r -E "Access-Control-Allow-Origin.*\*" \
+          --include="*.js" --include="*.ts" --include="*.py" --include="*.yaml" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" --exclude="*test*" --exclude="*dev*" 2>/dev/null; then
+          echo "⚠️  WARNING: Found wildcard CORS origins (security concern)"
+        fi
+        
+        # Check for hardcoded credentials patterns
+        echo "Checking for potential hardcoded credentials..."
+        if grep -r -E "(password|secret|api_key|apikey|token)[[:space:]]*[=:][[:space:]]*['\"][^'\"]{8,}['\"]" \
+          --include="*.js" --include="*.ts" --include="*.py" --include="*.yaml" --include="*.json" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" --exclude="*.example" --exclude="*test*" 2>/dev/null | \
+          grep -vE "(process\.env|os\.environ|getenv|ENV\[|\.env)" 2>/dev/null; then
+          echo "⚠️  WARNING: Potential hardcoded credentials detected"
+        fi
+        
+        # Check for deprecated API patterns
+        echo "Checking for deprecated API patterns..."
+        if grep -r -E "(api/v0|/api/legacy|deprecated)" \
+          --include="*.js" --include="*.ts" --include="*.py" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" --exclude="*test*" 2>/dev/null; then
+          echo "⚠️  WARNING: Found deprecated API patterns"
+        fi
+        
+        # Validate WebSocket URL consistency
+        echo "Checking WebSocket URL patterns..."
+        if grep -r -E "ws://[^l]" \
+          --include="*.js" --include="*.ts" --include="*.yaml" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" --exclude="*local*" --exclude="*dev*" 2>/dev/null; then
+          echo "⚠️  WARNING: Found non-secure WebSocket (ws://) in production code (should be wss://)"
+        fi
+        
+        # Check for proper environment variable usage
+        echo "Checking environment variable patterns..."
+        if grep -r -E "process\.env\.[A-Z_]+[[:space:]]*\|\|[[:space:]]*['\"]https?://" \
+          --include="*.js" --include="*.ts" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" 2>/dev/null | head -5; then
+          echo "ℹ️  INFO: Environment variables with URL fallbacks detected (verify fallbacks are appropriate)"
+        fi
+        
+        # Check for Heady-specific domain patterns
+        echo "Checking Heady domain patterns..."
+        HEADY_DOMAINS=("headysystems.com" "headyconnection.org" "headybuddy.org")
+        for hd in "${HEADY_DOMAINS[@]}"; do
+          if grep -r -E "[a-z]+\.$hd" . --exclude-dir=".git" --exclude-dir="node_modules" 2>/dev/null | \
+            grep -vE "(api|app|www|mail|cdn|assets|static)\.$hd" | head -3; then
+            echo "ℹ️  INFO: Found non-standard subdomain for $hd"
+          fi
+        done
+        
+        # Check for banned cloud provider domains per naming-compliance.yml
+        echo "Checking for banned cloud provider domains..."
+        if grep -r -E "\.onrender\.com|\.vercel\.app|\.netlify\.app|\.herokuapp\.com|\.firebaseapp\.com" \
+          --include="*.js" --include="*.ts" --include="*.json" --include="*.yaml" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" 2>/dev/null; then
+          echo "⚠️  WARNING: Found banned cloud provider domains (should use Heady domains)"
+        fi
+        
+        # Check for Windows drive letter paths per naming-compliance.yml
+        echo "Checking for Windows drive letter paths..."
+        if grep -r -E "[A-Z]:\\\\" \
+          --include="*.js" --include="*.ts" --include="*.json" --include="*.yaml" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" 2>/dev/null; then
+          echo "⚠️  WARNING: Found Windows drive letter paths (use relative paths)"
+        fi
+        
+        # Check for exposed secrets per hcfp-production-clean-build.yml
+        echo "Checking for exposed secrets..."
+        if grep -r -E "sk_live_|sk_test_|ghp_|gho_" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" 2>/dev/null; then
+          echo "❌ ERROR: Potential secrets found in code"
+        fi
+        
+        # Check for private IP ranges per naming-checks.yml
+        echo "Checking for private IP ranges..."
+        if grep -r -E "10\.[0-9]+\.[0-9]+\.[0-9]+|192\.168\.[0-9]+\.[0-9]+|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]+\.[0-9]+" \
+          --include="*.js" --include="*.ts" --include="*.json" --include="*.yaml" --include="*.html" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" \
+          --exclude="*local*" --exclude="*dev*" --exclude="hosts-file*" 2>/dev/null; then
+          echo "⚠️  WARNING: Found private IP references in code"
+        fi
+        
+        # Validate CDN and asset URLs
+        echo "Checking CDN and asset URL patterns..."
+        if grep -r -E "cdn\.(headysystems|headyconnection|headybuddy)" \
+          --include="*.js" --include="*.ts" --include="*.html" --include="*.css" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" 2>/dev/null | head -3; then
+          echo "ℹ️  INFO: CDN references found (verify proper configuration)"
+        fi
+        
+        # Check for insecure cookie settings
+        echo "Checking cookie security settings..."
+        if grep -r -E "cookie.*secure[[:space:]]*:[[:space:]]*false|httpOnly[[:space:]]*:[[:space:]]*false" \
+          --include="*.js" --include="*.ts" --include="*.py" \
+          . --exclude-dir=".git" --exclude-dir="node_modules" --exclude="*test*" --exclude="*dev*" 2>/dev/null; then
+          echo "⚠️  WARNING: Found insecure cookie settings"
+        fi
+        
+        echo "✅ Domain consistency check completed"
 
 
 
