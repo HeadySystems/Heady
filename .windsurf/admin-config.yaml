@@ -45,7 +45,7 @@ models:
       - translation
       - orchestration
     endpoints:
-      primary: "https://headyio.com/api/brain"
+      primary: "https://headysystems.com/api/brain"
       secondary: "https://headyio.com/api/brain-backup"
       tertiary: "https://headyio.com/api/brain-emergency"
     routing:
@@ -67,7 +67,7 @@ models:
       - quick_tasks
       - code_review
     endpoints:
-      primary: "https://headyio.com/api"
+      primary: "https://headysystems.com/api"
 
   # EXTERNAL MODELS REMOVED — 100% HEADY ONLY POLICY
 # All external models (Claude, GPT, Gemini) have been removed to ensure
@@ -146,9 +146,9 @@ system:
 # Heady Integration
 heady:
   # API Endpoints
-  manager_url: "https://headyio.com/manager"
-  brain_url: "https://headyio.com/api/brain"
-  mcp_gateway_url: "https://headyio.com/mcp"
+  manager_url: "https://headysystems.com/manager"
+  brain_url: "https://headysystems.com/api/brain"
+  mcp_gateway_url: "https://headysystems.com/mcp"
   
   # Authentication
   api_key: "${HEADY_API_KEY}"
