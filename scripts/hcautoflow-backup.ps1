@@ -9,7 +9,7 @@
 <# ║                                                                  ║
 <# ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
 <# ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-<# ║  FILE: scripts/hcautoflow.ps1                                                    ║
+<# ║  FILE: scripts/hcautoflow-backup.ps1                                                    ║
 <# ║  LAYER: automation                                                  ║
 <# ╚══════════════════════════════════════════════════════════════════╝
 <# HEADY_BRAND:END
@@ -78,25 +78,6 @@ function Get-SystemStatus {
     }
 }
 
-function Run-HealthCheck {
-    Write-Status "=== COMPREHENSIVE HEALTH CHECK ===" "Success"
-    
-    $systemStatus = Get-SystemStatus
-    
-    # Functionality Score Calculation
-    $score = $systemStatus.functionalityScore
-    Write-Status "Functionality Score: $score%" $(if ($score -ge $functionalityThreshold) { "Success" } else { "Warning" })
-    
-    if ($score -ge $functionalityThreshold) {
-        $thresholdStr = "$($functionalityThreshold)%"
-        Write-Status "✓ System operating above threshold ($thresholdStr)" "Success"
-    } else {
-        Write-Status "⚠ System below threshold - requires attention" "Warning"
-    }
-    
-    return $systemStatus
-}
-
 function Create-Checkpoint {
     param([hashtable]$systemStatus)
     
@@ -126,6 +107,24 @@ function Create-Checkpoint {
     Write-Status "  File: $checkpointFile" "Info"
     
     return $checkpointId
+}
+
+function Run-HealthCheck {
+    Write-Status "=== COMPREHENSIVE HEALTH CHECK ===" "Success"
+    
+    $systemStatus = Get-SystemStatus
+    
+    # Functionality Score Calculation
+    $score = $systemStatus.functionalityScore
+    Write-Status "Functionality Score: $score%" $(if ($score -ge $functionalityThreshold) { "Success" } else { "Warning" })"
+    
+    if ($score -ge $functionalityThreshold) {
+        Write-Status "✓ System operating above threshold ($functionalityThreshold%)" "Success"
+    } else {
+        Write-Status "⚠ System below threshold - requires attention" "Warning"
+    }
+    
+    return $systemStatus
 }
 
 try {

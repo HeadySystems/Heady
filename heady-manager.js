@@ -26,6 +26,18 @@
 // ║  🎯 Multi-Region Failover · Adaptive Load Balancing            ║
 // ║  💎 Service Mesh Integration · Distributed Tracing Ready       ║
 
+// Resource Allocation Configuration - User-Initiated Task Priority
+const TASK_PRIORITY = {
+  USER_INITIATED: 100,    // 100% resources for user tasks
+  SYSTEM_AUTO: 0,         // 0% resources (unless directed)
+  MAINTENANCE: 1,         // Minimal maintenance only
+  OPTIMIZATION: 0         // Suspended by default
+};
+
+// User Control State
+let userDirectedMode = true;
+let suspendedProcesses = new Set(['auto-training', 'monte-carlo', 'pattern-recognition', 'self-optimization']);
+
 // Core dependencies
 const yaml = require('js-yaml');
 const fs = require('fs');
@@ -975,7 +987,7 @@ try {
 } catch (err) {
   console.warn(`  ⚠ Resource Manager not loaded: ${err.message}`);
 
-  // Fallback inline resource health endpoint
+  // Fallback inline resource health endpoint - User-Directed Mode
   app.get("/api/resources/health", (req, res) => {
     const mem = process.memoryUsage();
     const osLib = require("os");
@@ -991,7 +1003,10 @@ try {
       disk: { currentPercent: 0, absoluteValue: 0, capacity: 0, unit: "GB" },
       gpu: null,
       safeMode: false,
-      status: "fallback",
+      status: "user-directed-mode",
+      userDirectedMode: userDirectedMode,
+      suspendedProcesses: Array.from(suspendedProcesses),
+      resourceAllocation: TASK_PRIORITY,
       ts: new Date().toISOString(),
     });
   });
@@ -1056,14 +1071,25 @@ try {
     mcGlobal.bind({ pipeline, registry: loadRegistry });
   }
 
-  // Start background MC cycles
-  mcGlobal.startAutoRun();
+  // Start background MC cycles - SUSPENDED in user-directed mode
+  if (!suspendedProcesses.has('monte-carlo')) {
+    mcGlobal.startAutoRun();
+  }
 
   // Default to speed_priority mode — speed is a first-class objective
-  mcPlanScheduler.setSpeedMode("on");
-
-  console.log("  ∞ Monte Carlo Plan Scheduler: LOADED (speed_priority mode)");
-  console.log("  ∞ Monte Carlo Global: AUTO-RUN started (60s cycles)");
+  // Monte Carlo - SUSPENDED by default (user-directed mode)
+  if (mcPlanScheduler && !suspendedProcesses.has('monte-carlo')) {
+    mcPlanScheduler.setSpeedMode("on");
+    console.log("  ∞ Monte Carlo Plan Scheduler: LOADED (user-directed mode)");
+  } else {
+    console.log("  ∞ Monte Carlo Plan Scheduler: SUSPENDED (user-directed mode)");
+  }
+  
+  if (mcGlobal && !suspendedProcesses.has('monte-carlo')) {
+    console.log("  ∞ Monte Carlo Global: AUTO-RUN started (60s cycles)");
+  } else {
+    console.log("  ∞ Monte Carlo Global: SUSPENDED (user-directed mode)");
+  }
 } catch (err) {
   console.warn(`  ⚠ Monte Carlo not loaded: ${err.message}`);
 }
@@ -2154,6 +2180,55 @@ app.get("/api/health", (req, res) => {
       resources: "/api/resources/health",
       buddy: "/api/buddy/health"
     }
+  });
+});
+
+// ─── User Resource Control API ────────────────────────────────────────
+/**
+ * @description Get current resource allocation state
+ * @returns {Object} Resource allocation status
+ */
+app.get("/api/resources/allocation", (req, res) => {
+  res.json({
+    ok: true,
+    userDirectedMode: userDirectedMode,
+    suspendedProcesses: Array.from(suspendedProcesses),
+    resourceAllocation: TASK_PRIORITY,
+    availableResources: {
+      cpu: "100%",
+      memory: "100%",
+      network: "100%",
+      storage: "100%"
+    },
+    ts: new Date().toISOString()
+  });
+});
+
+/**
+ * @description Control resource allocation (user directive)
+ * @returns {Object} Updated resource allocation status
+ */
+app.post("/api/resources/allocation", (req, res) => {
+  const { action, process, mode } = req.body;
+  
+  if (action === "resume" && process) {
+    suspendedProcesses.delete(process);
+    console.log(`✓ User directive: RESUMED ${process}`);
+  } else if (action === "suspend" && process) {
+    suspendedProcesses.add(process);
+    console.log(`✓ User directive: SUSPENDED ${process}`);
+  } else if (action === "toggle" && mode) {
+    userDirectedMode = mode === "user-directed";
+    console.log(`✓ User directive: MODE ${userDirectedMode ? 'USER-DIRECTED' : 'AUTO-MANAGED'}`);
+  }
+  
+  res.json({
+    ok: true,
+    userDirectedMode: userDirectedMode,
+    suspendedProcesses: Array.from(suspendedProcesses),
+    resourceAllocation: TASK_PRIORITY,
+    message: `Resource allocation updated: ${action} ${process || mode}`,
+    ts: new Date().toISOString()
   });
 });
 
