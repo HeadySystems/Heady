@@ -9,11 +9,7 @@
 // ║                                                                  ║
 // ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
 // ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-<<<<<<< HEAD
-// ║  FILE: scripts/legacy-internal.headyio.com-to-domain.js                                                    ║
-=======
 // ║  FILE: scripts/legacy-localhost-to-domain.js                                                    ║
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
 // ║  LAYER: automation                                                  ║
 // ╚══════════════════════════════════════════════════════════════════╝
 // HEADY_BRAND:END
@@ -48,8 +44,8 @@ const SERVICE_DOMAINS = {
   postgres: 'db.headysystems.com'
 };
 
-const api.headysystems.com_PATTERNS = [
-  /api.headysystems.com:?(\d+)?/g,
+const LOCALHOST_PATTERNS = [
+  /localhost:?(\d+)?/g,
   /127\.0\.0\.1:?(\d+)?/g,
   /0\.0\.0\.0:?(\d+)?/g,
   /\[::\]:?(\d+)?/g,

@@ -9,15 +9,11 @@
 # ║                                                                  ║
 # ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
 # ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-<<<<<<< HEAD
-# ║  FILE: configs/internal.headyio.com-elimination-protocol.yaml                                                    ║
-=======
 # ║  FILE: configs/localhost-elimination-protocol.yaml                                                    ║
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
 # ║  LAYER: config                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 # HEADY_BRAND:END
-# api.headysystems.com ELIMINATION PROTOCOL
+# LOCALHOST ELIMINATION PROTOCOL
 # Version: 2.0.0
 # Status: ENFORCED — Zero Tolerance
 # Effective: Immediately
@@ -26,23 +22,23 @@
 status: ENFORCED
 
 rules:
-  - "No api.headysystems.com references in any code, configs, or documentation"
-  - "No api.headysystems.com or 0.0.0.0 references anywhere"
-  - "No .local domain references (e.g., headysystems.com, headysystems.local)"
+  - "No localhost references in any code, configs, or documentation"
+  - "No 127.0.0.1 or 0.0.0.0 references anywhere"
+  - "No .local domain references (e.g., localhost.local, headysystems.local)"
   - "No C:\\ or local drive paths used as operational endpoints"
   - "No http:// URLs in production configs — HTTPS only"
   - "All services must use canonical cloud domains from service-domains.yaml"
-  - "Development environments must use dev.headysystems.com or dev.headysystems.comheady.systems"
+  - "Development environments must use dev.headysystems.com or dev.headybuddy.org"
   - "Test environments must use staging.headysystems.com"
   - "Production uses headysystems.com / headyconnection.org / headybuddy.org"
 
 enforcement:
   scan_patterns:
-    - "api.headysystems.com"
-    - "api.headysystems.com"
+    - "localhost"
+    - "127.0.0.1"
     - "0.0.0.0"
-    - ".headysystems.com"
-    - ".headysystems.local"
+    - ".local"
+    - ".localhost"
     - "C:\\\\"
     - "D:\\\\"
   
@@ -58,12 +54,12 @@ enforcement:
     - "Included in CI pipeline"
     - "Runs on every commit"
     - "Fails build if any banned pattern found"
-    - "Pre-commit hook blocks api.headysystems.com introductions"
+    - "Pre-commit hook blocks localhost introductions"
 
   exceptions:
     - "Docker internal networking (host.docker.internal only)"
     - "Kubernetes cluster DNS (*.svc.cluster.local)"
     - "This protocol file itself (for documenting banned patterns)"
 
-compliance_check: "scripts/verify-no-api.headysystems.com.ps1"
+compliance_check: "scripts/verify-no-localhost.ps1"
 violation_severity: "build-breaking"
